@@ -73,9 +73,9 @@ class Voronoi extends Generator {
           VoronoiCell cell = (VoronoiCell)ChildGenerators.get(k);
           double distance;
           if (ManhattanInterpretation) {
-            distance = ManhattanDistance(i, j, (int)cell.Pos.x, (int)cell.Pos.y);
+            distance = ManhattanDistance(i, j, (int)cell.pos.x, (int)cell.pos.y);
           } else {
-            distance = EuclideanDistance(i, j, (int)cell.Pos.x, (int)cell.Pos.y);
+            distance = EuclideanDistance(i, j, (int)cell.pos.x, (int)cell.pos.y);
           }
           if (distance <= LowestDistance) {
             LowestDistanceCell = cell;
@@ -103,11 +103,11 @@ class Voronoi extends Generator {
 class VoronoiCell extends Generator {
   color CellColor;
   int id;
-  Vector2 Pos;
-  VoronoiCell (Map map, int id, Vector2 Pos, color col, boolean lock) {
+  Vector2 pos;
+  VoronoiCell (Map map, int id, Vector2 pos, color col, boolean lock) {
     super(map, lock);
     this.id = id;
-    this.Pos = Pos;
+    this.pos = pos;
     CellColor = col;
   }
   void GeneratorFunction () {

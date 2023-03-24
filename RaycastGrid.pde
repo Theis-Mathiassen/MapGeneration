@@ -14,7 +14,7 @@ class Raycast {
   }
   void Draw () {
     stroke(0);
-    line(Source.x - MainCamera.Pos.x, Source.y - MainCamera.Pos.y, Hit.x - MainCamera.Pos.x, Hit.y - MainCamera.Pos.y);
+    line(Source.x - MainCamera.pos.x, Source.y - MainCamera.pos.y, Hit.x - MainCamera.pos.x, Hit.y - MainCamera.pos.y);
     noStroke();
   }
 }

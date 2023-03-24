@@ -1,11 +1,12 @@
 //final int sizeX = 2500;
 //final int sizeY = 1300;
 Camera MainCamera;
+Camera cameraVoronoi;
 Map MainMap = new Map();
 
 //Generators
 //Drunk drunk = new Drunk(MainMap,MainMap.tilesX * 2 / 4, MainMap.tilesY * 2 / 4, 30, true);
-//Drunk drunk2 = new Drunk(MainMap,130, 120, 2000000, true);
+Drunk drunk2 = new Drunk(MainMap,130, 120, 2000000, true);
 //Drunk drunk3 = new Drunk(MainMap,MainMap.tilesX * 3 / 4, MainMap.tilesY * 1 / 4, 20, false);
 //Drunk drunk4 = new Drunk(MainMap,10, 10, 10, false);
 //DrunkPath CastleToCave = new DrunkPath(MainMap, new Vector2[]{new Vector2(130,120), new Vector2(229, 60)}, 50,50,true);
@@ -35,8 +36,8 @@ float NoiseZoom = 0.1;
 
 void setup () {
   size(2500, 1300, P2D);
-  MainCamera = new Camera(0,0,width,height);
-  //CameraVoronoi = new Camera(0,0,width,height, 255);
+  MainCamera = new Camera(0,0,width,height, 128);
+  cameraVoronoi = new Camera(0,0,width,height, 255);
   frameRate(60);
   noStroke();
   background(0);
@@ -68,8 +69,8 @@ void setup () {
   //CastleToCave.ChildGenerators.add(ng);
   //ng.ChildGenerators.add(Cell);
   
-  //drunk2.ChildGenerators.add(voronoiGenerator);
-  voronoiGenerator.Generate();
+  drunk2.ChildGenerators.add(voronoiGenerator);
+  drunk2.Generate();
   
   
   //MZ = new MazeSolver(MainMap.GetGrid());
@@ -85,7 +86,8 @@ void setup () {
 
 void draw () {
   //background(0);
-  MainCamera.DrawMap(MainMap, true);
+  cameraVoronoi.DrawMap(MainMap, true);
+  MainCamera.DrawMap(MainMap, false);
   for (int i = GameObjects.size() - 1; i >= 0; i--) {
     GameObject object = GameObjects.get(i);
     object.Update();

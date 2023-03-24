@@ -1,5 +1,5 @@
 class Camera {
-  Vector2 Pos;
+  Vector2 pos;
   Vector2 Size;
   PShape FloorTile;
   
@@ -9,10 +9,10 @@ class Camera {
   PGraphics[][] TileChunks;
   
   
-  Camera (float x, float y, float w, float h) {
-    Pos = new Vector2(x,y);
+  Camera (float x, float y, float w, float h, int transparency) {
+    pos = new Vector2(x,y);
     Size = new Vector2(w,h);
-    Transparency = 255;
+    Transparency = transparency;
     
   }
   
@@ -23,24 +23,24 @@ class Camera {
       RenderChunks(map, Voronoi);
     }
     
-    int iStart = max((int)(Pos.x/ChunkSize), 0);
-    int iFinish = min(1+(int)(Pos.x+Size.x)/ChunkSize, TileChunks.length);
-    int jStart = max((int)(Pos.y/ChunkSize), 0);
-    int jFinish = min(1+(int)(Pos.y+Size.y)/ChunkSize, TileChunks[0].length);
+    int iStart = max((int)(pos.x/ChunkSize), 0);
+    int iFinish = min(1+(int)(pos.x+Size.x)/ChunkSize, TileChunks.length);
+    int jStart = max((int)(pos.y/ChunkSize), 0);
+    int jFinish = min(1+(int)(pos.y+Size.y)/ChunkSize, TileChunks[0].length);
     for (int i = iStart; i < iFinish; i++) {
       int iX = i * ChunkSize;
       for (int j = jStart; j < jFinish; j++) {
-        image(TileChunks[i][j], iX - Pos.x, j * ChunkSize - Pos.y);
+        image(TileChunks[i][j], iX - pos.x, j * ChunkSize - pos.y);
       }
     }
   }
   
-  void RenderChunks (Map map, boolean VoronoiRepresentation) {
-    int ChunksX = (map.tilesX * map.tileSizeX) / ChunkSize;
-    int ChunksY = (map.tilesY * map.tileSizeY) / ChunkSize;
-    TileChunks = new PGraphics[ChunksX][ChunksY];
-    for (int i = 0; i < ChunksX; i++) {
-      for (int j = 0; j < ChunksY; j++) {
+  void RenderChunks (Map map, boolean voronoiRepresentation) {
+    int chunksX = (map.tilesX * map.tileSizeX) / ChunkSize;
+    int chunksY = (map.tilesY * map.tileSizeY) / ChunkSize;
+    TileChunks = new PGraphics[chunksX][chunksY];
+    for (int i = 0; i < chunksX; i++) {
+      for (int j = 0; j < chunksY; j++) {
         TileChunks[i][j] = createGraphics(ChunkSize, ChunkSize);
         int TilesPerChunkX = ChunkSize / map.tileSizeX;
         int TilesPerChunkY = ChunkSize / map.tileSizeY;
@@ -51,27 +51,27 @@ class Camera {
           int x = i * TilesPerChunkX + k;
           for (int l = 0; l < TilesPerChunkY; l++) {
             int y = j * TilesPerChunkY + l;
-            if (VoronoiRepresentation) {
-              TileChunks[i][j].fill(map.VoronoiCell[x][y].CellColor);
+            if (voronoiRepresentation) {
+              TileChunks[i][j].fill(map.VoronoiCell[x][y].CellColor, Transparency);
             } else {
               if (map.grid[x][y] == 0) {
-                TileChunks[i][j].fill(0);
+                TileChunks[i][j].fill(0,Transparency);
               } else {
-                TileChunks[i][j].fill(128);
+                TileChunks[i][j].fill(128, Transparency);
               }
             }
-            if (VoronoiRepresentation) {
-              if (x == (int)map.VoronoiCell[x][y].Pos.x && y ==(int)map.VoronoiCell[x][y].Pos.y) {
-                TileChunks[i][j].fill(0);
+            if (voronoiRepresentation) {
+              if (x == (int)map.VoronoiCell[x][y].pos.x && y ==(int)map.VoronoiCell[x][y].pos.y) {
+                TileChunks[i][j].fill(0, Transparency);
               }
             }
             TileChunks[i][j].rect(k * map.tileSizeX, l * map.tileSizeY, map.tileSizeX, map.tileSizeY);
             
           }
         }
-        //if (VoronoiRepresentation && ((int)VoronoiCell[i][j].Pos.x) / ChunksX == i) {
+        //if (voronoiRepresentation && ((int)VoronoiCell[i][j].pos.x) / chunksX == i) {
         //  TileChunks[i][j].fill(0);
-        //  TileChunks[i][j].rect(VoronoiCell[i][j].Pos.x, VoronoiCell[i][j].Pos.y, tileSizeX, tileSizeY);
+        //  TileChunks[i][j].rect(VoronoiCell[i][j].pos.x, VoronoiCell[i][j].pos.y, tileSizeX, tileSizeY);
         //}
         TileChunks[i][j].endDraw();
       }
@@ -81,10 +81,10 @@ class Camera {
   
   
   void DrawGrid (int[][] grid, int tileSize) {
-    int iStart = max((int)Pos.x/tileSize, 0);
-    int iFinish = min(1+(int)(Pos.x+Size.x)/tileSize, grid.length);
-    int jStart = max((int)Pos.y/tileSize, 0);
-    int jFinish = min(1+(int)(Pos.y+Size.y)/tileSize, grid[0].length);
+    int iStart = max((int)pos.x/tileSize, 0);
+    int iFinish = min(1+(int)(pos.x+Size.x)/tileSize, grid.length);
+    int jStart = max((int)pos.y/tileSize, 0);
+    int jFinish = min(1+(int)(pos.y+Size.y)/tileSize, grid[0].length);
     //byte[][] grid = map.GetGrid();
     for (int i = iStart; i < iFinish; i++) {
       int iX = i * tileSize;
@@ -94,19 +94,19 @@ class Camera {
         } else if (grid[i][j] == 3) {
           fill(128, 128, 255);
         }
-        rect(iX - Pos.x, j*tileSize - Pos.y, tileSize, tileSize);
+        rect(iX - pos.x, j*tileSize - pos.y, tileSize, tileSize);
       }
     }
   }
   
   void DrawObject (GameObject obj) {
     fill(obj.skin);
-    rect(obj.Pos.x - Pos.x, obj.Pos.y - Pos.y, obj.w, obj.h);
+    rect(obj.pos.x - pos.x, obj.pos.y - pos.y, obj.w, obj.h);
   }
   
   void MoveTo (GameObject obj) {
-    Pos.x = obj.Pos.x - (Size.x/2);
-    Pos.y = obj.Pos.y - (Size.y/2);
+    pos.x = obj.pos.x - (Size.x/2);
+    pos.y = obj.pos.y - (Size.y/2);
   }
   
 }

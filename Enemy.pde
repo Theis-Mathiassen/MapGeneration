@@ -5,7 +5,7 @@ class Enemy extends GameObject {
   }
   Enemy (Vector2 pos, Map map) {
     super(map);
-    Pos = pos;
+    this.pos = pos;
     skin = color(0, 255, 0);
   }
   
@@ -14,7 +14,7 @@ class Enemy extends GameObject {
   }
   
   void ScanPlayer (Player player, Map map, int ObstructionValue) {
-    LineOfSight = new Raycast(new Vector2(Pos.x, Pos.y),new Vector2(player.Pos.x, player.Pos.y));
+    LineOfSight = new Raycast(new Vector2(pos.x, pos.y),new Vector2(player.pos.x, player.pos.y));
     LineOfSight.Calculate(map.grid, map.tileSizeX, ObstructionValue);
     //LineOfSight.Draw();
   }

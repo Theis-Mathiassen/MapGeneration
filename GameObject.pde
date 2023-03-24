@@ -1,5 +1,5 @@
 class GameObject {
-  Vector2 Pos = new Vector2(width / 2,height / 2);
+  Vector2 pos = new Vector2(width / 2,height / 2);
   float w = 8;
   float h = 8;
   float speed = 1;
@@ -11,7 +11,7 @@ class GameObject {
     this(map, width / 2,height / 2);
   }
   GameObject (Map map, float x, float y) {
-    Pos = new Vector2(x,y);
+    pos = new Vector2(x,y);
     this.map = map;
   }
   
@@ -21,23 +21,23 @@ class GameObject {
   
   
   void MoveUp () {
-    if (CheckCollision(Pos.x, Pos.y - speed)) {
-      Pos.y -= speed;
+    if (CheckCollision(pos.x, pos.y - speed)) {
+      pos.y -= speed;
     }
   }
   void MoveDown() {
-    if (CheckCollision(Pos.x, Pos.y + speed)) {
-        Pos.y += speed;
+    if (CheckCollision(pos.x, pos.y + speed)) {
+        pos.y += speed;
       }
   }
   void MoveRight() {
-    if (CheckCollision(Pos.x + speed, Pos.y)) {
-        Pos.x += speed;
+    if (CheckCollision(pos.x + speed, pos.y)) {
+        pos.x += speed;
       }
   }
   void MoveLeft() {
-    if (CheckCollision(Pos.x - speed, Pos.y)) {
-        Pos.x -= speed;
+    if (CheckCollision(pos.x - speed, pos.y)) {
+        pos.x -= speed;
       }
   }
   
