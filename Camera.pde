@@ -98,6 +98,24 @@ class Camera {
       }
     }
   }
+  void DrawGrid (boolean[][] grid, int tileSize) {
+    int iStart = max((int)pos.x/tileSize, 0);
+    int iFinish = min(1+(int)(pos.x+Size.x)/tileSize, grid.length);
+    int jStart = max((int)pos.y/tileSize, 0);
+    int jFinish = min(1+(int)(pos.y+Size.y)/tileSize, grid[0].length);
+    //byte[][] grid = map.GetGrid();
+    for (int i = iStart; i < iFinish; i++) {
+      int iX = i * tileSize;
+      for (int j = jStart; j < jFinish; j++) {
+        if (grid[i][j] == true) {
+          fill(0,0, 255);
+        } else {
+          fill(255, 0, 0);
+        }
+        rect(iX - pos.x, j*tileSize - pos.y, tileSize, tileSize);
+      }
+    }
+  }
   
   void DrawObject (GameObject obj) {
     fill(obj.skin);

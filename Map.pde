@@ -3,8 +3,8 @@ class Map {
   //Tile size and Chunksize, can not be relatively prime.
   int tileSizeX = 8;
   int tileSizeY = 8;  
-  int tilesX = 312;//sizeX / tileSizeX;
-  int tilesY = 160;//sizeY / tileSizeY;
+  int tilesX = 256;//sizeX / tileSizeX;
+  int tilesY = 128;//sizeY / tileSizeY;
   private byte[][] grid = new byte[tilesX][tilesY];    //0 = Wall & 1 = Walkable(Floor)
   
   VoronoiCell[][] VoronoiCell = new VoronoiCell[tilesX][tilesY];
@@ -20,7 +20,7 @@ class Map {
   }
   
   boolean SetGrid (int x, int y, byte val) {
-    if (x < 0 || x >= grid.length || y < 0 || y >= grid[x].length) {
+    if (x < 0 || x >= grid.length || y < 0 || y >= grid[x].length) { //<>//
       return false;
     }
     if (Locked[x][y] == true) {
@@ -42,22 +42,26 @@ class Map {
   byte GetGrid (int x, int y) {
     return grid[x][y];
   }
+  //Push old locked state and assign new.
   void PushLock (boolean[][] Lock) {
     if (Locked.length != Lock.length) {
       System.out.println("Wrong size input");
       return;
     }
+    print("Push");
+    LockedStates.push(Locked);
+    boolean[][] newLock = new boolean[Locked.length][Locked[0].length];
     for (int i = 0; i < Locked.length; i++) {
       if (Locked[i].length != Lock[i].length) {
         System.out.println("Wrong size input");
         return;
       }
       for(int j = 0; j < Locked[i].length; j++) {
-        Locked[i][j] = Locked[i][j] || Lock[i][j];
+        newLock[i][j] = Locked[i][j] || Lock[i][j];
       }
     }
-    print("Push");
-    LockedStates.push(Locked);
+    Locked = newLock;
+    
     /*print("Printing:\n");
     for (int i = 0; i < grid.length; i++) {
        for (int j = 0; j < grid[i].length; j++) {

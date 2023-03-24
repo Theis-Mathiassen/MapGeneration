@@ -28,7 +28,7 @@ class Stack<T> {
  
       // Display message when there are no elements in
       // the stack
-      System.out.println("Stack Underflow");
+      print("Stack Underflow");
  
       return null;
     }

@@ -6,8 +6,8 @@ Map MainMap = new Map();
 
 //Generators
 //Drunk drunk = new Drunk(MainMap,MainMap.tilesX * 2 / 4, MainMap.tilesY * 2 / 4, 30, true);
-Drunk drunk2 = new Drunk(MainMap,130, 120, 20000, true, true);
-Drunk drunk21 = new Drunk(MainMap,130, 120, 20000, true, true);
+//Drunk drunk2 = new Drunk(MainMap,130, 120, 20000, true, true);
+Drunk drunk21 = new Drunk(MainMap,130, 120, 2, true, true);
 //Drunk drunk3 = new Drunk(MainMap,MainMap.tilesX * 3 / 4, MainMap.tilesY * 1 / 4, 20, false);
 //Drunk drunk4 = new Drunk(MainMap,10, 10, 10, false);
 //DrunkPath CastleToCave = new DrunkPath(MainMap, new Vector2[]{new Vector2(130,120), new Vector2(229, 60)}, 50,50,true);
@@ -36,7 +36,7 @@ float NoiseZoom = 0.1;
 
 
 void setup () {
-  size(2000, 1000, P2D);
+  size(2500, 1300, P2D);
   MainCamera = new Camera(0,0,width,height, 128);
   cameraVoronoi = new Camera(0,0,width,height, 128);
   frameRate(60);
@@ -44,7 +44,7 @@ void setup () {
   background(0);
   randomSeed(0);
   
-  voronoiGenerator = new Voronoi(MainMap, 5, true, true);
+  voronoiGenerator = new Voronoi(MainMap, 15, true, true);
   
   /*PImage CastleIMG = loadImage("Castle.png");
   byte[][] CastleSCH = new byte[0][0];
@@ -71,15 +71,13 @@ void setup () {
   ng.ChildGenerators.add(Cell);
   
   //drunk2.ChildGenerators.add(voronoiGenerator);
-  drunk2.pos.x = voronoiGenerator.cells[0].pos.x;
-  drunk2.pos.y = voronoiGenerator.cells[0].pos.y;
-  voronoiGenerator.addGeneratorToCell(0, drunk2);
+  //drunk2.pos.x = voronoiGenerator.cells[0].pos.x;
+  //drunk2.pos.y = voronoiGenerator.cells[0].pos.y;
+  //voronoiGenerator.addGeneratorToCell(0, drunk2);
   drunk21.pos.x = voronoiGenerator.cells[2].pos.x;
-  drunk21.pos.y = voronoiGenerator.cells[2].pos.y; //<>// //<>//
+  drunk21.pos.y = voronoiGenerator.cells[2].pos.y;
   voronoiGenerator.addGeneratorToCell(2, drunk21);
-  voronoiGenerator.Generate(); //<>// //<>//
-  
-
+  voronoiGenerator.Generate();
   cameraVoronoi.DrawMap(MainMap, true);
   //MainCamera.DrawMap(MainMap, false);
   
@@ -94,19 +92,11 @@ void setup () {
   GameObjects.add(new Enemy(new Vector2(2100, 650), MainMap));
   
 }
-/*int igen = 0;
-void GenerateNext () {
-  voronoiGenerator.ChildGenerators.get(igen).Generate();
-  igen++;
-  
-  MainCamera.DrawGrid(MainMap.Locked, MainMap.tileSizeX);
-}*/
 
 void draw () {
-  background(0);
-  cameraVoronoi.DrawMap(MainMap, true);
-  MainCamera.DrawMap(MainMap, false);
-  //MainCamera.DrawGrid(MainMap.Locked, MainMap.tileSizeX);
+  //background(0);
+  //cameraVoronoi.DrawMap(MainMap, true);
+  //MainCamera.DrawMap(MainMap, false);
   for (int i = GameObjects.size() - 1; i >= 0; i--) {
     GameObject object = GameObjects.get(i);
     object.Update();
@@ -138,7 +128,6 @@ byte[][] Img2Schematic (PImage img) {
 
 void mousePressed () {
   //print(Cell.GetNeighbors((int)(mouseX - MainCamera.Pos.x) / MainMap.tileSizeX, (int)(mouseY - MainCamera.Pos.y) / MainMap.tileSizeY, MainMap.GetGrid()));
-  //GenerateNext();
 }
 void keyPressed() {
     if (key >= 0 && key < 128) {

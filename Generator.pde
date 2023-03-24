@@ -53,14 +53,18 @@ class Voronoi extends Generator {
   color[] colorArray = new color[]{color(33,26,82),color(89, 79, 191),color(84, 97, 110),color(187, 91, 23),color(223, 142, 48),
                               color(151, 112, 31),color(177, 147, 53),color(0, 127, 163),color(49, 169, 193),color(161, 101, 71),
                               color(204, 139, 102),color(14, 133, 99),color(92, 175, 141),color(204, 68, 91),color(231, 130, 147)};
+  VoronoiCell[] cells;
   Voronoi (Map map, int numSeeds, boolean ManhattanInterpretation, boolean lock) {
     super(map, lock);
     //Create all cells and add them to childgenerators
     NumSeeds = numSeeds;
+    cells = new VoronoiCell[NumSeeds];
     this.ManhattanInterpretation = ManhattanInterpretation;
     for (int i = 0; i < numSeeds; i++) {
       color col = i < colorArray.length ? colorArray[i] : color(random(255), random(255), random(255));
-      ChildGenerators.add(new VoronoiCell(map, i, new Vector2(random(map.tilesX), random(map.tilesY)), col, lock));
+      VoronoiCell cell = new VoronoiCell(map, i, new Vector2(random(map.tilesX), random(map.tilesY)), col, lock);
+      ChildGenerators.add(cell);
+      cells[i] = cell;
     }
     
   }
@@ -85,6 +89,9 @@ class Voronoi extends Generator {
         map.VoronoiCell[i][j] = LowestDistanceCell;// == null ? color(0) : LowestDistanceCell.CellColor;
       }  
     }
+  }
+  void addGeneratorToCell (int index, Generator gen) {
+    ChildGenerators.get(index).ChildGenerators.add(gen);
   }
   void LockFunction (){
   }
@@ -113,7 +120,7 @@ class VoronoiCell extends Generator {
   void GeneratorFunction () {
     for (int i = 0; i < map.tilesX; i++) {
       for (int j = 0; j < map.tilesY; j++) {
-        if (map.VoronoiCell[i][j] == this) {
+        if (map.VoronoiCell[i][j] != this) {
           CellsToLock[i][j] = true;
         }
       }
@@ -124,35 +131,55 @@ class VoronoiCell extends Generator {
 
 
 class Drunk extends Generator {
-  private Vector2 Pos;
+  Vector2 pos;
   private int Iterations;
-  Drunk (Map map, int x, int y, int iterations, boolean LockSteppedTiles) {
+  boolean constrainedByLock;
+  Drunk (Map map, int x, int y, int iterations, boolean LockSteppedTiles, boolean constrainedByLock) {
     super(map, LockSteppedTiles);
-    Pos = new Vector2(x,y);
+    pos = new Vector2(x,y);
     Iterations = iterations;
+    this.constrainedByLock = constrainedByLock;
   }
   
   void GeneratorFunction (){
+    print("Drunk"); //<>//
     int dir = 0;
+    pos.x = constrain(pos.x, 1, map.tilesX-2);
+    pos.y = constrain(pos.y, 1, map.tilesY-2);
+    boolean succeds = map.SetGrid((int)pos.x,(int)pos.y,(byte)1);
+    rect(pos.x * map.tileSizeX, pos.y*map.tileSizeY, 10, 10);
+    if (constrainedByLock && succeds == false) {
+      //Locked start location
+      return;
+    };
+    if (Lock) {
+      CellsToLock[(int)pos.x][(int)pos.y] = true;
+    }
     for (int i = 0; i < Iterations; i++) {
+      int prevX = (int)pos.x, prevY = (int)pos.y;
       int changeDir = floor(random(0, 1));
       if (changeDir == 0) {
         dir = (dir + floor(random(1, 4))) % 4;
       }
       if (dir < 1) {
-        Pos.x+=1;
+        pos.x+=1;
       } else if (dir < 2) {
-        Pos.y+=1;
+        pos.y+=1;
       } else if (dir < 3) {
-        Pos.x-=1;
+        pos.x-=1;
       } else if (dir < 4) {
-        Pos.y-=1;
+        pos.y-=1;
       }
-      Pos.x = constrain(Pos.x, 1, map.tilesX-2);
-      Pos.y = constrain(Pos.y, 1, map.tilesY-2);
-      map.SetGrid((int)Pos.x,(int)Pos.y,(byte)1);
+      pos.x = constrain(pos.x, 1, map.tilesX-2);
+      pos.y = constrain(pos.y, 1, map.tilesY-2);
+      succeds = map.SetGrid((int)pos.x,(int)pos.y,(byte)1);
+      rect(pos.x * map.tileSizeX, pos.y*map.tileSizeY, 10, 10);
+      if (constrainedByLock && succeds == false) {
+        pos.x = prevX; //<>//
+        pos.y = prevY;
+      };
       if (Lock) {
-        CellsToLock[(int)Pos.x][(int)Pos.y] = true;
+        CellsToLock[(int)pos.x][(int)pos.y] = true;
       }
     }
   }
@@ -161,17 +188,17 @@ class Drunk extends Generator {
 class CellularAutomata extends Generator {
   int Birth = 5;
   int Survival = 3;
-  int OverPopulation = 9;
+  int OverPopulation = 9; //<>//
   int Iterations = 1;
 
   CellularAutomata (Map map, int birth, int survival, int overPopulation, int iterations) {
     super(map, false);
-    Birth = birth;
+    Birth = birth; //<>//
     Survival = survival;
     OverPopulation = overPopulation;
     Iterations = iterations;
   }
-
+ //<>//
   void GeneratorFunction (){
     for (int i = 0; i < Iterations; i++) {
       Iterate();
