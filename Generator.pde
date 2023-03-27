@@ -47,6 +47,15 @@ public abstract class Generator implements IGenerator {
   }
 }
 
+class EmptyGen extends Generator {
+  EmptyGen (Map map) {
+    super(map, false);
+  }
+  void GeneratorFunction () {
+    
+  }
+}
+
 class Voronoi extends Generator {
   int NumSeeds;
   boolean ManhattanInterpretation;
@@ -142,12 +151,12 @@ class Drunk extends Generator {
   }
   
   void GeneratorFunction (){
-    print("Drunk"); //<>//
+    //print("Drunk"); //<>//
     int dir = 0;
     pos.x = constrain(pos.x, 1, map.tilesX-2);
     pos.y = constrain(pos.y, 1, map.tilesY-2);
     boolean succeds = map.SetGrid((int)pos.x,(int)pos.y,(byte)1);
-    rect(pos.x * map.tileSizeX, pos.y*map.tileSizeY, 10, 10);
+    //rect(pos.x * map.tileSizeX, pos.y*map.tileSizeY, 10, 10);
     if (constrainedByLock && succeds == false) {
       //Locked start location
       return;
@@ -173,7 +182,7 @@ class Drunk extends Generator {
       pos.x = constrain(pos.x, 1, map.tilesX-2);
       pos.y = constrain(pos.y, 1, map.tilesY-2);
       succeds = map.SetGrid((int)pos.x,(int)pos.y,(byte)1);
-      rect(pos.x * map.tileSizeX, pos.y*map.tileSizeY, 10, 10);
+      //rect(pos.x * map.tileSizeX, pos.y*map.tileSizeY, 10, 10);
       if (constrainedByLock && succeds == false) {
         pos.x = prevX; //<>//
         pos.y = prevY;
@@ -222,7 +231,7 @@ class CellularAutomata extends Generator {
               AliveNeighbors += 1;
             }
           }*/
-          if (oldGrid[xT][yT] != 0) {
+          if (oldGrid[xT][yT] != 0/* && map.Locked[xT][yT] == false*/) {
             AliveNeighbors += 1;
           }
         }
@@ -284,11 +293,13 @@ class WhiteNoise extends Generator {
 class DrunkPath extends Generator {
   private Vector2 Pos;
   Vector2[] Targets;
+  int pathRadius;
   
-  DrunkPath(Map map, Vector2[] Targets, int StartX, int StartY, boolean LockSteppedTiles) {
+  DrunkPath(Map map, Vector2[] Targets, int StartX, int StartY, boolean LockSteppedTiles, int pathRadius) {
     super(map, LockSteppedTiles);
     this.Targets = Targets;
     this.Pos = new Vector2(StartX,StartY);
+    this.pathRadius = pathRadius;
   }
   void GeneratorFunction () {
     for (int i = 0; i < Targets.length; i++) {
@@ -324,9 +335,18 @@ class DrunkPath extends Generator {
       }
       Pos.x = constrain(Pos.x, 0, map.tilesX-1);
       Pos.y = constrain(Pos.y, 0, map.tilesY-1);
-      map.SetGrid((int)Pos.x,(int)Pos.y,(byte)1);
-      if (Lock) {
-        CellsToLock[(int)Pos.x][(int)Pos.y] = true;
+      for (int i = -(pathRadius-1); i <= (pathRadius-1); i++) {
+        int ix = (int)Pos.x + i;
+        for (int j = -(pathRadius-1); j <= (pathRadius-1); j++) {
+          int jy = (int)Pos.y + j;
+          if (ix >= 0 && ix < map.tilesX && jy >= 0 && jy < map.tilesY) {
+            map.SetGrid(ix,jy,(byte)1);
+            if (Lock) {
+              CellsToLock[ix][jy] = true;
+            }
+          }
+          
+        }
       }
     }
   }

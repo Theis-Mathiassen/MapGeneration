@@ -6,32 +6,33 @@ Map MainMap = new Map();
 
 //Generators
 //Drunk drunk = new Drunk(MainMap,MainMap.tilesX * 2 / 4, MainMap.tilesY * 2 / 4, 30, true);
-Drunk drunk2 = new Drunk(MainMap,130, 120, 20000, true, true);
-Drunk drunk21 = new Drunk(MainMap,130, 120, 20000, true, true);
+Drunk drunk2;
+Drunk drunk21;
 //Drunk drunk3 = new Drunk(MainMap,MainMap.tilesX * 3 / 4, MainMap.tilesY * 1 / 4, 20, false);
 //Drunk drunk4 = new Drunk(MainMap,10, 10, 10, false);
-//DrunkPath CastleToCave = new DrunkPath(MainMap, new Vector2[]{new Vector2(130,120), new Vector2(229, 60)}, 50,50,true);
+DrunkPath CastleToCave;
 
 
 
 Voronoi voronoiGenerator;
 
-CellularAutomata Cell  = new CellularAutomata(MainMap,7,5,9,5);
+CellularAutomata Cell1;
+WhiteNoise HighNoise;
 
-WhiteNoise ng = new WhiteNoise(MainMap,0.7);
-//Prefab Castle;
-//Prefab Cave;
+CellularAutomata Cell2;
+WhiteNoise LowNoise;
+
+CellularAutomata Cell3;
+WhiteNoise LowNoise2;
+
+Prefab Castle;
+Prefab Cave;
 
 //Player
 ArrayList<GameObject> GameObjects = new ArrayList<GameObject>();
-Player player = new Player(MainMap, MainMap.tileSizeX * 130, MainMap.tileSizeX * 120);
+Player player;
 
-MazeSolver MZ;
 
-float NoiseZoom = 0.1;
-
-//MazeSolver maze = new MazeSolver(grid);
-//boolean solved = maze.solve();
 
 
 
@@ -44,9 +45,24 @@ void setup () {
   background(0);
   randomSeed(0);
   
+  player = new Player(MainMap, MainMap.tileSizeX * 130, MainMap.tileSizeX * 120);
+  
+  drunk2 = new Drunk(MainMap,130, 120, 90000, true, true);
+  Drunk drunk21 = new Drunk(MainMap,130, 120, 40000, true, true);
+  CastleToCave = new DrunkPath(MainMap, new Vector2[]{new Vector2(130,120),new Vector2(230,50), new Vector2(399, 160)}, 50,50,true, 5);
+  
+  Cell1  = new CellularAutomata(MainMap,6,5,9,5);
+  HighNoise = new WhiteNoise(MainMap,0.7);
+  
+  Cell2  = new CellularAutomata(MainMap,3,3,9,3);
+  LowNoise = new WhiteNoise(MainMap,0.3);
+  
+  Cell3  = new CellularAutomata(MainMap,4,3,9,3);
+  WhiteNoise LowNoise2 = new WhiteNoise(MainMap,0.6);
+  
   voronoiGenerator = new Voronoi(MainMap, 5, true, true);
   
-  /*PImage CastleIMG = loadImage("Castle.png");
+  PImage CastleIMG = loadImage("Castle.png");
   byte[][] CastleSCH = new byte[0][0];
   if (CastleIMG != null) {
     CastleSCH = Img2Schematic(CastleIMG);
@@ -58,39 +74,56 @@ void setup () {
   if (CaveImage != null) {
     CaveSCH = Img2Schematic(CaveImage);
   }
-  Cave = new Prefab(MainMap, 230, 50,CaveSCH,true);*/
+  Cave = new Prefab(MainMap, 400, 150,CaveSCH,true);
   
   
   //drunk.ChildGenerators.add(drunk2);
   //drunk.ChildGenerators.add(drunk3);
   //drunk.ChildGenerators.add(Cell);
   //drunk2.ChildGenerators.add(drunk4);
-  //Castle.ChildGenerators.add(Cave);
+  Castle.ChildGenerators.add(Cave);
+  
   //Cave.ChildGenerators.add(CastleToCave);
   //CastleToCave.ChildGenerators.add(ng);
-  ng.ChildGenerators.add(Cell);
+  //ng.ChildGenerators.add(Cell);
+  Cave.ChildGenerators.add(voronoiGenerator);
   
-  //drunk2.ChildGenerators.add(voronoiGenerator);
-  drunk2.pos.x = voronoiGenerator.cells[0].pos.x;
-  drunk2.pos.y = voronoiGenerator.cells[0].pos.y;
-  voronoiGenerator.addGeneratorToCell(0, drunk2);
-  drunk21.pos.x = voronoiGenerator.cells[2].pos.x;
-  drunk21.pos.y = voronoiGenerator.cells[2].pos.y; //<>// //<>//
-  voronoiGenerator.addGeneratorToCell(2, drunk21);
-  voronoiGenerator.Generate(); //<>// //<>//
+  HighNoise.ChildGenerators.add(Cell1);
+  voronoiGenerator.addGeneratorToCell(0, HighNoise);
+  
+  LowNoise.ChildGenerators.add(Cell2);
+  voronoiGenerator.addGeneratorToCell(1, LowNoise);
+  
+  LowNoise2.ChildGenerators.add(Cell3);
+  voronoiGenerator.addGeneratorToCell(2, LowNoise2);
+  
+  drunk21.pos.x = voronoiGenerator.cells[3].pos.x;
+  drunk21.pos.y = voronoiGenerator.cells[3].pos.y; //<>// //<>//
+  voronoiGenerator.addGeneratorToCell(3, drunk21);
+  drunk2.pos.x = voronoiGenerator.cells[4].pos.x;
+  drunk2.pos.y = voronoiGenerator.cells[4].pos.y;
+  voronoiGenerator.addGeneratorToCell(4, drunk2);
+  
+  
+  
+  Cave.ChildGenerators.add(CastleToCave);
+  
+  Castle.Generate();
+  //voronoiGenerator.Generate(); //<>// //<>//
   
 
-  cameraVoronoi.DrawMap(MainMap, true);
+  //cameraVoronoi.DrawMap(MainMap, true);
   //MainCamera.DrawMap(MainMap, false);
   
   
   //MZ = new MazeSolver(MainMap.GetGrid());
   //MZ.traverse(30, 30);
   
-  //CameraVoronoi.DrawMap(MainMap, true);
-  //MainCamera.DrawMap(MainMap, false);
-  //save("mapPath2.png");
-  GameObjects.add(player);
+  background(0);
+  cameraVoronoi.DrawMap(MainMap, true);
+  MainCamera.DrawMap(MainMap, false);
+  save("mapDrunkardsPath.png");
+  //GameObjects.add(player);
   GameObjects.add(new Enemy(new Vector2(2100, 650), MainMap));
   
 }
