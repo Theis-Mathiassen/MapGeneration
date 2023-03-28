@@ -20,7 +20,7 @@ class Map {
   }
   
   boolean SetGrid (int x, int y, byte val) {
-    if (x < 0 || x >= grid.length || y < 0 || y >= grid[x].length) { //<>//
+    if (x < 0 || x >= grid.length || y < 0 || y >= grid[x].length) {
       return false;
     }
     if (Locked[x][y] == true) {

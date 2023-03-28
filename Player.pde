@@ -6,20 +6,23 @@ class Player extends GameObject {
     speed = 1;
   }
   void move () {
+    Vector2 dir = new Vector2();
     if (InputSystem.keys['a'] == 1) {
-      MoveLeft();
+      dir.x -= 1;
     }
     if (InputSystem.keys['d'] == 1) {
-      MoveRight();
+      dir.x += 1;
     }
     if (InputSystem.keys['w'] == 1) {
-      MoveUp();
+      dir.y -= 1;
     }
     if (InputSystem.keys['s'] == 1) {
-      MoveDown();
+      dir.y += 1;
     }
+    Move(dir);
   }
   public void Update () {
+    super.Update();
     move();
   }
   //public void Draw () {

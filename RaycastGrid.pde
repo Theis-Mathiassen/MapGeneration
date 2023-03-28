@@ -2,16 +2,97 @@ class Raycast {
   Vector2 Source;
   Vector2 Target;
   Vector2 Hit;
+  Vector2 heading;
   Raycast (Vector2 Source, Vector2 Target) {
     this.Source = Source;
     this.Target = Target;
+    heading = Target.subtract(Source).normalize();
   }
   
-  void Calculate (byte[][] map, int tileSize, int ObstructionValue) {
-    Hit = new Vector2(Target.x, Target.y);
-    //Use Bresenham's algorithm
+  boolean Calculate (byte[][] map, int tileSize, int obstructionValue) {
     
+    
+    //print(heading + "\n");
+    
+    float tmpX = Source.x;
+    float tmpY = Source.y;
+    
+    int currentTileX = floor(tmpX) / tileSize;
+    int currentTileY = floor(tmpY) / tileSize;
+    
+    boolean targetReached = false;
+    
+    while (targetReached == false) {
+      
+      float nearestXBorder = heading.x == 0 ? Float.MAX_VALUE: (heading.x > 0 ? (currentTileX + 1) * tileSize : (currentTileX-1) * tileSize );
+      float distToNearestXBorder = (heading.x > 0 ? nearestXBorder - tmpX : tmpX - nearestXBorder );
+      float nearestYBorder = heading.y == 0 ? Float.MAX_VALUE : (heading.y > 0 ? (currentTileY + 1) * tileSize : (currentTileY-1) * tileSize );
+      float distToNearestYBorder = (heading.y > 0 ? nearestYBorder - tmpY : tmpY - nearestYBorder );
+      
+      if (nearestXBorder == Float.NaN && nearestYBorder == Float.NaN) {
+        targetReached = true; //<>//
+        break;
+      } else if (nearestXBorder == Float.NaN) {
+        //Check if overshoot
+        if ((tmpY <= Target.y && Target.y <= nearestYBorder) || (tmpY >= Target.y && Target.y >= nearestYBorder)) { //<>//
+          targetReached = true;
+          break;
+        }
+        tmpY = nearestYBorder;
+        
+      } else if (nearestYBorder == Float.NaN) {
+        //Check if overshoot
+        if ((tmpX <= Target.x && Target.x <= nearestXBorder) || (tmpX >= Target.x && Target.x >= nearestXBorder)) { //<>//
+          targetReached = true;
+          break;
+        }
+        tmpX = nearestXBorder;
+      } else {
+        //Check if overshoot
+        if (heading.x == 0) {
+          heading.x += 0.001;
+        }
+        if (heading.y == 0) {
+          heading.y += 0.001;
+        }
+        float stepsToXBorder = abs(distToNearestXBorder / heading.x);
+        float stepsToYBorder = abs(distToNearestYBorder / heading.y);
+        if (stepsToXBorder < stepsToYBorder) {
+          //Check if overshoot
+          if ((tmpX <= Target.x && Target.x <= nearestXBorder) || (tmpX >= Target.x && Target.x >= nearestXBorder)) {
+            targetReached = true;
+            break;
+          }
+          tmpX += heading.x * stepsToXBorder;
+          tmpY += heading.y * stepsToXBorder;
+        } else {
+          //Check if overshoot
+          if ((tmpY <= Target.y && Target.y <= nearestYBorder) || (tmpY >= Target.y && Target.y >= nearestYBorder)) {
+            targetReached = true;
+            break;
+          }
+          tmpY += heading.y * stepsToYBorder;
+          tmpX += heading.x * stepsToYBorder;
+        }
+      }
+      currentTileX = floor(tmpX) / tileSize;
+      currentTileY = floor(tmpY) / tileSize;
+      try {
+        rect(currentTileX * tileSize - MainCamera.pos.x, currentTileY * tileSize - MainCamera.pos.y, tileSize, tileSize);
+        if (map[currentTileX][currentTileY] == obstructionValue) {
+          Hit = new Vector2(tmpX, tmpY);
+          return false;
+        }
+      } catch(ArrayIndexOutOfBoundsException e) {
+        Hit = new Vector2(tmpX, tmpY);
+        return false;
+      }
+      //print(heading.x + "\n");
+    }
+    Hit = new Vector2(Target.x, Target.y);
+    return true;
   }
+  
   void Draw () {
     stroke(0);
     line(Source.x - MainCamera.pos.x, Source.y - MainCamera.pos.y, Hit.x - MainCamera.pos.x, Hit.y - MainCamera.pos.y);

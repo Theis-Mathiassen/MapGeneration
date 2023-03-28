@@ -5,6 +5,7 @@ class GameObject {
   float speed = 1;
   String Tag = "";
   color skin = color(1);
+  boolean HasMoved = false;
   Map map;  //The map the gameobject exists within.
   
   GameObject (Map map) {
@@ -16,29 +17,35 @@ class GameObject {
   }
   
   public void Update () {
-    
+    HasMoved = false;
   }
   
-  
-  void MoveUp () {
-    if (CheckCollision(pos.x, pos.y - speed)) {
-      pos.y -= speed;
+  void Move (Vector2 heading) {
+    heading = heading.normalize().multiply(speed);
+    if (HasMoved == false) {
+      print("x:" + heading.x + ", y: " + heading.y + "\n");
+      if (CheckCollision(pos.x, pos.y + heading.y)) {
+        pos.y += heading.y;
+      }
+      
+      if (CheckCollision(pos.x + heading.x, pos.y)) {
+        pos.x += heading.x;
+      }
+      HasMoved = true;
     }
   }
+  
+  void MoveUp () {
+    Move(new Vector2(0, -1));
+  }
   void MoveDown() {
-    if (CheckCollision(pos.x, pos.y + speed)) {
-        pos.y += speed;
-      }
+    Move(new Vector2(0, 1));
   }
   void MoveRight() {
-    if (CheckCollision(pos.x + speed, pos.y)) {
-        pos.x += speed;
-      }
+    Move(new Vector2(1, 0));
   }
   void MoveLeft() {
-    if (CheckCollision(pos.x - speed, pos.y)) {
-        pos.x -= speed;
-      }
+    Move(new Vector2(-1, 0));
   }
   
   boolean CheckCollision (float x, float y) {
