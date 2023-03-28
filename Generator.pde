@@ -272,19 +272,30 @@ class CellularAutomata extends Generator {
 
 class WhiteNoise extends Generator {
   float Chance;
-  WhiteNoise(Map map, float chance) {
+  int size;
+  WhiteNoise(Map map, float chance, int size) {
     super(map, false);
     Chance = chance;
+    this.size = size;
   }
   void GeneratorFunction (){
-    for (int i = 0; i < map.tilesX; i++) {
-       for (int j = 0; j < map.tilesY; j++) {
-         if (random(1) < Chance) {
-           map.SetGrid(i,j,(byte)1);
-         } else {
-           map.SetGrid(i,j,(byte)0);
-         }
-       }
+    for (int i = 0; i < map.tilesX / size; i++) {
+      for (int j = 0; j < map.tilesY / size; j++) {
+        float randomVal= random(1);
+        for (int k = 0; k < size; k++) {
+          int xk = i*size+k;
+          for (int l = 0; l < size; l++) {
+            int ly = j*size+l;
+            if (xk >= 0 & xk < map.tilesX && ly >= 0 && ly < map.tilesY) {
+              if (randomVal < Chance) {
+                map.SetGrid(xk,ly,(byte)1);
+              } else {
+                map.SetGrid(xk,ly,(byte)0);
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

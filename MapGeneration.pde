@@ -52,13 +52,13 @@ void setup () {
   CastleToCave = new DrunkPath(MainMap, new Vector2[]{new Vector2(130,120),new Vector2(230,50), new Vector2(399, 160)}, 50,50,true, 5);
   
   Cell1  = new CellularAutomata(MainMap,6,5,9,5);
-  HighNoise = new WhiteNoise(MainMap,0.7);
+  HighNoise = new WhiteNoise(MainMap, 0.6, 4);
   
   Cell2  = new CellularAutomata(MainMap,3,3,9,3);
-  LowNoise = new WhiteNoise(MainMap,0.3);
+  LowNoise = new WhiteNoise(MainMap, 0.3, 1);
   
   Cell3  = new CellularAutomata(MainMap,4,3,9,3);
-  WhiteNoise LowNoise2 = new WhiteNoise(MainMap,0.6);
+  WhiteNoise LowNoise2 = new WhiteNoise(MainMap,0.6, 1);
   
   voronoiGenerator = new Voronoi(MainMap, 5, true, true);
   
@@ -69,7 +69,7 @@ void setup () {
   }
   Castle = new Prefab(MainMap, 30, 30,CastleSCH,true);
   
-  PImage CaveImage = loadImage("Cave.png");
+  PImage CaveImage = loadImage("Outpost.png");
   byte[][] CaveSCH = new byte[0][0];
   if (CaveImage != null) {
     CaveSCH = Img2Schematic(CaveImage);
