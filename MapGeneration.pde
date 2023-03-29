@@ -37,15 +37,15 @@ Player player;
 
 
 void setup () {
-  size(2000, 1000, P2D);
-  MainCamera = new Camera(0,0,width,height, 255);
+  size(1600, 900, P2D);
+  MainCamera = new Camera(0,0,width,height, 128);
   cameraVoronoi = new Camera(0,0,width,height, 128);
   frameRate(60);
   noStroke();
   background(0);
   randomSeed(0);
   
-  player = new Player(MainMap, 236, 200);
+  player = new Player(MainMap, 59*MainMap.tileSizeX, 50*MainMap.tileSizeY);
   
   drunk2 = new Drunk(MainMap,130, 120, 90000, true, true);
   Drunk drunk21 = new Drunk(MainMap,130, 120, 40000, true, true);
@@ -120,11 +120,11 @@ void setup () {
   //MZ.traverse(30, 30);
   
   background(0);
-  cameraVoronoi.DrawMap(MainMap, true);
+  //cameraVoronoi.DrawMap(MainMap, true);
   MainCamera.DrawMap(MainMap, false);
-  save("mapDrunkardsPath.png");
+  save("finalMap.png");
   GameObjects.add(player);
-  GameObjects.add(new Enemy(new Vector2(185, 210), MainMap));
+  GameObjects.add(new Enemy(new Vector2(162*MainMap.tileSizeX, 90*MainMap.tileSizeY), MainMap));
   
 }
 /*int igen = 0;
@@ -137,7 +137,7 @@ void GenerateNext () {
 
 void draw () {
   background(0);
-  //cameraVoronoi.DrawMap(MainMap, true);
+  cameraVoronoi.DrawMap(MainMap, true);
   MainCamera.DrawMap(MainMap, false);
   //MainCamera.DrawGrid(MainMap.Locked, MainMap.tileSizeX);
   for (int i = GameObjects.size() - 1; i >= 0; i--) {
@@ -146,6 +146,7 @@ void draw () {
     MainCamera.DrawObject(object);
   }
   MainCamera.MoveTo(player);
+  cameraVoronoi.MoveTo(player);
   
   //print(player.pos.x + "," + player.pos.y + "\n");
   

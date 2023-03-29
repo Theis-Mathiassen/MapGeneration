@@ -24,9 +24,38 @@ class Raycast {
     
     while (targetReached == false) {
       
-      float nearestXBorder = heading.x == 0 ? Float.MAX_VALUE: (heading.x > 0 ? (currentTileX + 1) * tileSize : (currentTileX-1) * tileSize );
+      float nearestXBorder;
+      if (heading.x == 0) {
+        nearestXBorder = Float.MAX_VALUE;
+      } else {
+        if (heading.x > 0) {
+          nearestXBorder = (currentTileX + 1) * tileSize;
+        } else {
+          if (floor(tmpX) == (currentTileX) * tileSize) {
+            nearestXBorder = (currentTileX - 1) * tileSize;
+          } else {
+            nearestXBorder = (currentTileX) * tileSize;
+          }
+        }
+      }
+      //= heading.x == 0 ? Float.MAX_VALUE: (heading.x > 0 ? (currentTileX + 1) * tileSize : (floor(tmpX) == (currentTileX) * tileSize ? (currentTileX - 1) * tileSize : (currentTileX) * tileSize));
+      
       float distToNearestXBorder = (heading.x > 0 ? nearestXBorder - tmpX : tmpX - nearestXBorder );
-      float nearestYBorder = heading.y == 0 ? Float.MAX_VALUE : (heading.y > 0 ? (currentTileY + 1) * tileSize : (currentTileY-1) * tileSize );
+      //float nearestYBorder = heading.y == 0 ? Float.MAX_VALUE : (heading.y > 0 ? (currentTileY + 1) * tileSize : (floor(tmpY) == (currentTileY) * tileSize ? (currentTileY - 1) * tileSize : (currentTileY) * tileSize));
+      float nearestYBorder;
+      if (heading.y == 0) {
+        nearestYBorder = Float.MAX_VALUE;
+      } else {
+        if (heading.y > 0) {
+          nearestYBorder = (currentTileY + 1) * tileSize;
+        } else {
+          if (floor(tmpY) == (currentTileY) * tileSize) {
+            nearestYBorder = (currentTileY - 1) * tileSize;
+          } else {
+            nearestYBorder = (currentTileY) * tileSize;
+          }
+        }
+      }
       float distToNearestYBorder = (heading.y > 0 ? nearestYBorder - tmpY : tmpY - nearestYBorder );
       
       if (nearestXBorder == Float.NaN && nearestYBorder == Float.NaN) {
@@ -49,12 +78,12 @@ class Raycast {
         tmpX = nearestXBorder;
       } else {
         //Check if overshoot
-        if (heading.x == 0) {
+        /*if (heading.x == 0) {
           heading.x += 0.001;
         }
         if (heading.y == 0) {
           heading.y += 0.001;
-        }
+        }*/
         float stepsToXBorder = abs(distToNearestXBorder / heading.x);
         float stepsToYBorder = abs(distToNearestYBorder / heading.y);
         if (stepsToXBorder < stepsToYBorder) {
@@ -77,6 +106,7 @@ class Raycast {
       }
       currentTileX = floor(tmpX) / tileSize;
       currentTileY = floor(tmpY) / tileSize;
+      circle(tmpX - MainCamera.pos.x, tmpY - MainCamera.pos.y, 2);
       try {
         rect(currentTileX * tileSize - MainCamera.pos.x, currentTileY * tileSize - MainCamera.pos.y, tileSize, tileSize);
         if (map[currentTileX][currentTileY] == obstructionValue) {

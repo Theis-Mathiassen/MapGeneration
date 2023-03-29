@@ -3,7 +3,7 @@ class Player extends GameObject {
     super(map, x, y);
     Tag = "Player";
     skin = color(255, 0, 0);
-    speed = 1;
+    speed = 2;
   }
   void move () {
     Vector2 dir = new Vector2();
