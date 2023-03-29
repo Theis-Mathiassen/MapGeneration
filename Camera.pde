@@ -109,10 +109,11 @@ class Camera {
       for (int j = jStart; j < jFinish; j++) {
         if (grid[i][j] == true) {
           fill(0,0, 255);
+          rect(iX - pos.x, j*tileSize - pos.y, tileSize, tileSize);
         } else {
           fill(255, 0, 0);
         }
-        rect(iX - pos.x, j*tileSize - pos.y, tileSize, tileSize);
+        //rect(iX - pos.x, j*tileSize - pos.y, tileSize, tileSize);
       }
     }
   }

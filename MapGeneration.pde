@@ -37,7 +37,7 @@ Player player;
 
 
 void setup () {
-  size(1600, 900, P2D);
+  size(2500, 1350, P2D);
   MainCamera = new Camera(0,0,width,height, 128);
   cameraVoronoi = new Camera(0,0,width,height, 128);
   frameRate(60);
@@ -51,16 +51,16 @@ void setup () {
   Drunk drunk21 = new Drunk(MainMap,130, 120, 40000, true, true);
   CastleToCave = new DrunkPath(MainMap, new Vector2[]{new Vector2(130,120),new Vector2(230,50), new Vector2(399, 160)}, 50,50,true, 5);
   
-  Cell1  = new CellularAutomata(MainMap,6,5,9,5);
+  Cell1  = new CellularAutomata(MainMap,6,5,9,0,5);
   HighNoise = new WhiteNoise(MainMap, 0.6, 4);
   
-  Cell2  = new CellularAutomata(MainMap,3,3,9,3);
+  Cell2  = new CellularAutomata(MainMap,3,3,9,0,3);
   LowNoise = new WhiteNoise(MainMap, 0.3, 1);
   
-  Cell3  = new CellularAutomata(MainMap,4,3,9,3);
+  Cell3  = new CellularAutomata(MainMap,4,3,9,0,3);
   WhiteNoise LowNoise2 = new WhiteNoise(MainMap,0.6, 1);
   
-  voronoiGenerator = new Voronoi(MainMap, 5, true, true);
+  voronoiGenerator = new Voronoi(MainMap, 5, true,20, true);
   
   PImage CastleIMG = loadImage("Castle.png");
   byte[][] CastleSCH = new byte[0][0];
@@ -103,8 +103,11 @@ void setup () {
   drunk2.pos.x = voronoiGenerator.cells[4].pos.x;
   drunk2.pos.y = voronoiGenerator.cells[4].pos.y;
   voronoiGenerator.addGeneratorToCell(4, drunk2);
-  
-  
+  //voronoiGenerator.addGeneratorToBorder(HighNoise);
+  Generator borderGen = new WhiteNoise(MainMap,0.6, 1);
+  borderGen.ChildGenerators.add(new CellularAutomata(MainMap,5,3,9, 0,5));
+  voronoiGenerator.addGeneratorToBorder(borderGen);
+  //voronoiGenerator.addGeneratorToBorder(new CellularAutomata(MainMap,4,2,9, 0.3,16));
   
   Cave.ChildGenerators.add(CastleToCave);
   
@@ -139,6 +142,7 @@ void draw () {
   background(0);
   cameraVoronoi.DrawMap(MainMap, true);
   MainCamera.DrawMap(MainMap, false);
+  //MainCamera.DrawGrid(voronoiGenerator.cellBorder, 8);
   //MainCamera.DrawGrid(MainMap.Locked, MainMap.tileSizeX);
   for (int i = GameObjects.size() - 1; i >= 0; i--) {
     GameObject object = GameObjects.get(i);

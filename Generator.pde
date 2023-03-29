@@ -58,30 +58,35 @@ class EmptyGen extends Generator {
 
 class Voronoi extends Generator {
   int NumSeeds;
+  int borderWidth;
   boolean ManhattanInterpretation;
   color[] colorArray = new color[]{color(33,26,82),color(89, 79, 191),color(84, 97, 110),color(187, 91, 23),color(223, 142, 48),
                               color(151, 112, 31),color(177, 147, 53),color(0, 127, 163),color(49, 169, 193),color(161, 101, 71),
                               color(204, 139, 102),color(14, 133, 99),color(92, 175, 141),color(204, 68, 91),color(231, 130, 147)};
   VoronoiCell[] cells;
-  Voronoi (Map map, int numSeeds, boolean ManhattanInterpretation, boolean lock) {
+  boolean[][] cellBorder;
+  Voronoi (Map map, int numSeeds, boolean ManhattanInterpretation, int borderWidth, boolean lock) {
     super(map, lock);
     //Create all cells and add them to childgenerators
     NumSeeds = numSeeds;
     cells = new VoronoiCell[NumSeeds];
+    cellBorder = new boolean[map.tilesX][map.tilesY];
     this.ManhattanInterpretation = ManhattanInterpretation;
+    this.borderWidth = borderWidth;
     for (int i = 0; i < numSeeds; i++) {
       color col = i < colorArray.length ? colorArray[i] : color(random(255), random(255), random(255));
       VoronoiCell cell = new VoronoiCell(map, i, new Vector2(random(map.tilesX), random(map.tilesY)), col, lock);
       ChildGenerators.add(cell);
       cells[i] = cell;
     }
-    
+    ChildGenerators.add(new VoronoiCellBorder(map, this, lock));
   }
   void GeneratorFunction () {
     for (int i = 0; i < map.tilesX; i++) {
       for (int j = 0; j < map.tilesY; j++) {
         VoronoiCell LowestDistanceCell = null;
         double LowestDistance = Double.MAX_VALUE;
+        double prevLowestDistance = 0;
         for (int k = 0; k < NumSeeds; k++) {
           VoronoiCell cell = (VoronoiCell)ChildGenerators.get(k);
           double distance;
@@ -90,10 +95,37 @@ class Voronoi extends Generator {
           } else {
             distance = EuclideanDistance(i, j, (int)cell.pos.x, (int)cell.pos.y);
           }
-          if (distance <= LowestDistance) {
+          if (distance <= LowestDistance) { //<>//
             LowestDistanceCell = cell;
+            prevLowestDistance = LowestDistance;
             LowestDistance = distance;
+            
           }
+        }
+        if (prevLowestDistance - LowestDistance < map.tileSizeX*0.5) {
+          print(prevLowestDistance + "\n");
+          print(LowestDistance + "\n");
+          print((prevLowestDistance - LowestDistance) + "\n");
+          print((prevLowestDistance - LowestDistance < map.tileSizeX*0.5) + "\n");
+          print((-(borderWidth-1)) + "\n");
+          print("\n");
+          for (int l = -(borderWidth-1); l <= (borderWidth-1); l++) {
+            int lx = i + l;
+            if (lx >= 0 && lx < map.tilesX) {
+              cellBorder[lx][j] = true;
+            }
+          }
+          for (int o = -(borderWidth-1); o <= (borderWidth-1); o++) {
+            int oy = j + o;
+            if (oy >= 0 && oy < map.tilesY) {
+              cellBorder[i][oy] = true;
+            }
+          }
+          //if() {
+          //  cellBorder[i][j] = true;
+          //} else {
+          //  cellBorder[i][j] = false;
+          //}
         }
         map.VoronoiCell[i][j] = LowestDistanceCell;// == null ? color(0) : LowestDistanceCell.CellColor;
       }  
@@ -101,6 +133,9 @@ class Voronoi extends Generator {
   }
   void addGeneratorToCell (int index, Generator gen) {
     ChildGenerators.get(index).ChildGenerators.add(gen);
+  }
+  void addGeneratorToBorder (Generator gen) {
+    ChildGenerators.get(NumSeeds).ChildGenerators.add(gen);
   }
   void LockFunction (){
   }
@@ -130,6 +165,23 @@ class VoronoiCell extends Generator {
     for (int i = 0; i < map.tilesX; i++) {
       for (int j = 0; j < map.tilesY; j++) {
         if (map.VoronoiCell[i][j] != this) {
+          CellsToLock[i][j] = true;
+        }
+      }
+    }
+  }
+}
+
+class VoronoiCellBorder extends Generator {
+  Voronoi voronoi;
+  VoronoiCellBorder(Map map, Voronoi voronoi, boolean lock) {
+    super(map, lock);
+    this.voronoi = voronoi;
+  }
+  void GeneratorFunction () {
+    for (int i = 0; i < map.tilesX; i++) {
+      for (int j = 0; j < map.tilesY; j++) {
+        if (voronoi.cellBorder[i][j] != true) {
           CellsToLock[i][j] = true;
         }
       }
@@ -198,19 +250,21 @@ class CellularAutomata extends Generator {
   int Birth = 5;
   int Survival = 3;
   int OverPopulation = 9; //<>//
+  float chanceToSpawn = 0;
   int Iterations = 1;
 
-  CellularAutomata (Map map, int birth, int survival, int overPopulation, int iterations) {
+  CellularAutomata (Map map, int birth, int survival, int overPopulation, float chanceToSpawn, int iterations) {
     super(map, false);
     Birth = birth; //<>//
     Survival = survival;
     OverPopulation = overPopulation;
+    this.chanceToSpawn = chanceToSpawn;
     Iterations = iterations;
   }
  //<>// //<>//
   void GeneratorFunction (){
     for (int i = 0; i < Iterations; i++) {
-      Iterate();
+      Iterate(i);
     } //<>// //<>//
   }
   byte GetNeighbors (int x, int y, byte[][] oldGrid) {
@@ -239,7 +293,7 @@ class CellularAutomata extends Generator {
     }
     return AliveNeighbors;
   }
-  void Iterate () {
+  void Iterate (int iteration) {
     byte[][] oldGrid = map.GetGrid();
     for (int i = 0; i < map.tilesX; i++) {
        for (int j = 0; j < map.tilesY; j++) {
@@ -261,8 +315,12 @@ class CellularAutomata extends Generator {
              map.SetGrid(i,j,(byte)1);
              //oldGrid[i][j] = 1;
            } else {
-             map.SetGrid(i,j,(byte)0);
+             if (AliveNeighbors == 0 && random(1) < chanceToSpawn && iteration < Iterations*0.5) {
+               map.SetGrid(i,j,(byte)1);
+             } else {
+               map.SetGrid(i,j,(byte)0);
              //oldGrid[i][j] = 0;
+             }
            }
          }
        }
