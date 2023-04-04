@@ -1,10 +1,11 @@
 
 class Map {
   //Tile size and Chunksize, can not be relatively prime.
-  int tileSizeX = 4;
-  int tileSizeY = 4;  
-  int tilesX = 512;//sizeX / tileSizeX;
-  int tilesY = 256;//sizeY / tileSizeY;
+  int tileSizeX = 1;
+  int tileSizeY = 1;  
+  int tilesX = 1024*8;//sizeX / tileSizeX;
+  int tilesY = 512*8;//sizeY / tileSizeY;
+  boolean generated = false;
   private byte[][] grid = new byte[tilesX][tilesY];    //0 = Wall & 1 = Walkable(Floor)
   
   VoronoiCell[][] VoronoiCell = new VoronoiCell[tilesX][tilesY];

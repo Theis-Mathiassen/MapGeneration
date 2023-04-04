@@ -1,7 +1,7 @@
 class GameObject {
   Vector2 pos = new Vector2(width / 2,height / 2);
-  float w = 4;
-  float h = 4;
+  float w = 1;
+  float h = 1;
   float speed = 1;
   String Tag = "";
   color skin = color(1);
@@ -24,13 +24,13 @@ class GameObject {
     heading = heading.normalize().multiply(speed);
     if (HasMoved == false) {
       //print("x:" + heading.x + ", y: " + heading.y + "\n");
-      if (CheckCollision(pos.x, pos.y + heading.y)) {
+      //if (CheckCollision(pos.x, pos.y + heading.y)) {
         pos.y += heading.y;
-      }
+      //}
       
-      if (CheckCollision(pos.x + heading.x, pos.y)) {
+      //if (CheckCollision(pos.x + heading.x, pos.y)) {
         pos.x += heading.x;
-      }
+      //}
       HasMoved = true;
     }
   }

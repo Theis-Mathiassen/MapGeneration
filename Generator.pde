@@ -95,7 +95,7 @@ class Voronoi extends Generator {
           } else {
             distance = EuclideanDistance(i, j, (int)cell.pos.x, (int)cell.pos.y);
           }
-          if (distance <= LowestDistance) { //<>//
+          if (distance <= LowestDistance) {
             LowestDistanceCell = cell;
             prevLowestDistance = LowestDistance;
             LowestDistance = distance;
@@ -103,12 +103,12 @@ class Voronoi extends Generator {
           }
         }
         if (prevLowestDistance - LowestDistance < map.tileSizeX*0.5) {
-          print(prevLowestDistance + "\n");
-          print(LowestDistance + "\n");
-          print((prevLowestDistance - LowestDistance) + "\n");
-          print((prevLowestDistance - LowestDistance < map.tileSizeX*0.5) + "\n");
-          print((-(borderWidth-1)) + "\n");
-          print("\n");
+          //print(prevLowestDistance + "\n");
+          //print(LowestDistance + "\n");
+          //print((prevLowestDistance - LowestDistance) + "\n");
+          //print((prevLowestDistance - LowestDistance < map.tileSizeX*0.5) + "\n");
+          //print((-(borderWidth-1)) + "\n");
+          //print("\n");
           for (int l = -(borderWidth-1); l <= (borderWidth-1); l++) {
             int lx = i + l;
             if (lx >= 0 && lx < map.tilesX) {
@@ -236,7 +236,7 @@ class Drunk extends Generator {
       succeds = map.SetGrid((int)pos.x,(int)pos.y,(byte)1);
       //rect(pos.x * map.tileSizeX, pos.y*map.tileSizeY, 10, 10);
       if (constrainedByLock && succeds == false) {
-        pos.x = prevX; //<>//
+        pos.x = prevX;
         pos.y = prevY;
       };
       if (Lock) {
@@ -246,16 +246,18 @@ class Drunk extends Generator {
   }
 }
 
+//Wall dead
+//Walkable alive
 class CellularAutomata extends Generator {
   int Birth = 5;
   int Survival = 3;
-  int OverPopulation = 9; //<>//
+  int OverPopulation = 9;
   float chanceToSpawn = 0;
   int Iterations = 1;
 
   CellularAutomata (Map map, int birth, int survival, int overPopulation, float chanceToSpawn, int iterations) {
     super(map, false);
-    Birth = birth; //<>//
+    Birth = birth;
     Survival = survival;
     OverPopulation = overPopulation;
     this.chanceToSpawn = chanceToSpawn;
@@ -331,10 +333,13 @@ class CellularAutomata extends Generator {
 class WhiteNoise extends Generator {
   float Chance;
   int size;
-  WhiteNoise(Map map, float chance, int size) {
+  //Change the existing tiles indstead of overwriting them with a value
+  boolean apply;
+  WhiteNoise(Map map, float chance, int size, boolean apply) {
     super(map, false);
     Chance = chance;
     this.size = size;
+    this.apply = apply;
   }
   void GeneratorFunction (){
     for (int i = 0; i < map.tilesX / size; i++) {
@@ -346,9 +351,21 @@ class WhiteNoise extends Generator {
             int ly = j*size+l;
             if (xk >= 0 & xk < map.tilesX && ly >= 0 && ly < map.tilesY) {
               if (randomVal < Chance) {
-                map.SetGrid(xk,ly,(byte)1);
+                if (apply == true) {
+                  
+                  byte currentVal = (byte)(map.GetGrid(xk, ly));
+                  map.SetGrid(xk,ly, currentVal == 1 ? (byte)0 : (byte)1);
+                  //print();
+                }else {
+                  map.SetGrid(xk,ly,(byte)1);
+                }
+                //map.SetGrid(xk,ly, apply == true ? (byte)(map.GetGrid(xk, ly) == 1 ? 0 : 1) : (byte)1);
               } else {
-                map.SetGrid(xk,ly,(byte)0);
+                if (apply == true) {
+                  
+                }else {
+                  map.SetGrid(xk,ly,(byte)0);
+                }
               }
             }
           }

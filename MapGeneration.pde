@@ -1,7 +1,7 @@
 //final int sizeX = 2500;
 //final int sizeY = 1300;
 Camera MainCamera;
-Camera cameraVoronoi;
+//Camera cameraVoronoi;
 Map MainMap = new Map();
 
 //Generators
@@ -37,9 +37,9 @@ Player player;
 
 
 void setup () {
-  size(2500, 1350, P2D);
-  MainCamera = new Camera(0,0,width,height, 128);
-  cameraVoronoi = new Camera(0,0,width,height, 128);
+  size(2048, 1024, P2D);
+  MainCamera = new Camera(0,0,width,height, 128, false);
+  //cameraVoronoi = new Camera(0,0,width,height, 255, true);
   frameRate(60);
   noStroke();
   background(0);
@@ -52,15 +52,15 @@ void setup () {
   CastleToCave = new DrunkPath(MainMap, new Vector2[]{new Vector2(130,120),new Vector2(230,50), new Vector2(399, 160)}, 50,50,true, 5);
   
   Cell1  = new CellularAutomata(MainMap,6,5,9,0,5);
-  HighNoise = new WhiteNoise(MainMap, 0.6, 4);
+  HighNoise = new WhiteNoise(MainMap, 0.6, 4, false);
   
   Cell2  = new CellularAutomata(MainMap,3,3,9,0,3);
-  LowNoise = new WhiteNoise(MainMap, 0.3, 1);
+  LowNoise = new WhiteNoise(MainMap, 0.3, 1, false);
   
   Cell3  = new CellularAutomata(MainMap,4,3,9,0,3);
-  WhiteNoise LowNoise2 = new WhiteNoise(MainMap,0.6, 1);
+  WhiteNoise LowNoise2 = new WhiteNoise(MainMap,0.6, 1, false);
   
-  voronoiGenerator = new Voronoi(MainMap, 5, true,20, true);
+  voronoiGenerator = new Voronoi(MainMap, 5, true, 10, true);
   
   PImage CastleIMG = loadImage("Castle.png");
   byte[][] CastleSCH = new byte[0][0];
@@ -76,17 +76,10 @@ void setup () {
   }
   Cave = new Prefab(MainMap, 400, 150,CaveSCH,true);
   
-  
-  //drunk.ChildGenerators.add(drunk2);
-  //drunk.ChildGenerators.add(drunk3);
-  //drunk.ChildGenerators.add(Cell);
-  //drunk2.ChildGenerators.add(drunk4);
   Castle.ChildGenerators.add(Cave);
   
-  //Cave.ChildGenerators.add(CastleToCave);
-  //CastleToCave.ChildGenerators.add(ng);
-  //ng.ChildGenerators.add(Cell);
-  Cave.ChildGenerators.add(voronoiGenerator);
+  Cave.ChildGenerators.add(CastleToCave);
+  CastleToCave.ChildGenerators.add(voronoiGenerator);
   
   HighNoise.ChildGenerators.add(Cell1);
   voronoiGenerator.addGeneratorToCell(0, HighNoise);
@@ -104,15 +97,14 @@ void setup () {
   drunk2.pos.y = voronoiGenerator.cells[4].pos.y;
   voronoiGenerator.addGeneratorToCell(4, drunk2);
   //voronoiGenerator.addGeneratorToBorder(HighNoise);
-  Generator borderGen = new WhiteNoise(MainMap,0.6, 1);
-  borderGen.ChildGenerators.add(new CellularAutomata(MainMap,5,3,9, 0,5));
+  Generator borderGen = new WhiteNoise(MainMap, 0.3, 1, true);
+  borderGen.ChildGenerators.add(new CellularAutomata(MainMap,3,2,9,0,1));
   voronoiGenerator.addGeneratorToBorder(borderGen);
   //voronoiGenerator.addGeneratorToBorder(new CellularAutomata(MainMap,4,2,9, 0.3,16));
   
-  Cave.ChildGenerators.add(CastleToCave);
   
-  Castle.Generate();
-  //voronoiGenerator.Generate(); //<>// //<>// //<>//
+  thread("GenerateMap");
+   //<>//
   
 
   //cameraVoronoi.DrawMap(MainMap, true);
@@ -123,9 +115,10 @@ void setup () {
   //MZ.traverse(30, 30);
   
   background(0);
-  //cameraVoronoi.DrawMap(MainMap, true);
-  MainCamera.DrawMap(MainMap, false);
-  save("finalMap.png");
+  MainCamera.DrawMap(MainMap);
+  //cameraVoronoi.DrawMap(MainMap);
+  
+  save("random.png");
   GameObjects.add(player);
   GameObjects.add(new Enemy(new Vector2(162*MainMap.tileSizeX, 90*MainMap.tileSizeY), MainMap));
   
@@ -140,8 +133,8 @@ void GenerateNext () {
 
 void draw () {
   background(0);
-  cameraVoronoi.DrawMap(MainMap, true);
-  MainCamera.DrawMap(MainMap, false);
+  //cameraVoronoi.DrawMap(MainMap);
+  MainCamera.DrawMap(MainMap);
   //MainCamera.DrawGrid(voronoiGenerator.cellBorder, 8);
   //MainCamera.DrawGrid(MainMap.Locked, MainMap.tileSizeX);
   for (int i = GameObjects.size() - 1; i >= 0; i--) {
@@ -150,11 +143,22 @@ void draw () {
     MainCamera.DrawObject(object);
   }
   MainCamera.MoveTo(player);
-  cameraVoronoi.MoveTo(player);
+  //cameraVoronoi.MoveTo(player);
   
   //print(player.pos.x + "," + player.pos.y + "\n");
   
   //text(frameRate,5,10);
+}
+
+void GenerateMap () {
+  print(millis());
+  Castle.Generate();
+  MainMap.generated = true;
+  print(millis());
+  MainCamera.TileChunks = null;
+}
+void RenderMap () {
+  MainCamera.RenderChunks();
 }
 
 

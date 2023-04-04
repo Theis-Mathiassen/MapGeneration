@@ -8,7 +8,7 @@ class Enemy extends GameObject {
     super(map);
     this.pos = pos;
     skin = color(0, 255, 0);
-    speed = 0.85;
+    speed = 0.55;
     LastSeenPlayer = new Vector2(pos.x, pos.y);
   }
   

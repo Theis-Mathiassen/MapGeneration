@@ -7,35 +7,59 @@ class Camera {
   
   int ChunkSize = 128;
   PGraphics[][] TileChunks;
+  boolean renderingChunks;
+  Map map;
+  boolean voronoiRepresentation;
   
   
-  Camera (float x, float y, float w, float h, int transparency) {
+  Camera (float x, float y, float w, float h, int transparency, boolean voronoiRepresentation) {
     pos = new Vector2(x,y);
     Size = new Vector2(w,h);
     Transparency = transparency;
-    
+    //TileChunks = new PGraphics[chunksX][chunksY];
+    this.voronoiRepresentation = voronoiRepresentation;
   }
   
-  void DrawMap (Map map, boolean Voronoi) {
+  void DrawMap (Map map) {
     
-    if (TileChunks == null) {
-      
-      RenderChunks(map, Voronoi);
+    if (TileChunks == null && renderingChunks == false && map.generated == true) {
+      renderingChunks = true;
+      this.map = map;
+      thread("RenderMap");
     }
-    
-    int iStart = max((int)(pos.x/ChunkSize), 0);
-    int iFinish = min(1+(int)(pos.x+Size.x)/ChunkSize, TileChunks.length);
-    int jStart = max((int)(pos.y/ChunkSize), 0);
-    int jFinish = min(1+(int)(pos.y+Size.y)/ChunkSize, TileChunks[0].length);
-    for (int i = iStart; i < iFinish; i++) {
-      int iX = i * ChunkSize;
-      for (int j = jStart; j < jFinish; j++) {
-        image(TileChunks[i][j], iX - pos.x, j * ChunkSize - pos.y);
+    if (TileChunks == null || renderingChunks == true) { //<>//
+      String displayText;
+      if (map.generated == true) {
+        displayText = "Drawing";
+      } else {
+        displayText = "Generating";
+      }
+      if (second() % 3 < 1) {
+        text(displayText + ".", width/2, height/2);
+      } else if(second() % 3 < 2) {
+        text(displayText + "..", width/2, height/2);
+      } else {
+        text(displayText + "...", width/2, height/2);
+      }
+        
+      
+    } else {
+      int iStart = max((int)(pos.x/ChunkSize), 0);
+      int iFinish = min(1+(int)(pos.x+Size.x)/ChunkSize, TileChunks.length);
+      int jStart = max((int)(pos.y/ChunkSize), 0);
+      int jFinish = min(1+(int)(pos.y+Size.y)/ChunkSize, TileChunks[0].length);
+      for (int i = iStart; i < iFinish; i++) {
+        int iX = i * ChunkSize;
+        for (int j = jStart; j < jFinish; j++) {
+          image(TileChunks[i][j], iX - pos.x, j * ChunkSize - pos.y);
+        }
       }
     }
+    
   }
   
-  void RenderChunks (Map map, boolean voronoiRepresentation) {
+  public void RenderChunks () {
+    print("Rendering");
     int chunksX = (map.tilesX * map.tileSizeX) / ChunkSize;
     int chunksY = (map.tilesY * map.tileSizeY) / ChunkSize;
     TileChunks = new PGraphics[chunksX][chunksY];
@@ -51,8 +75,13 @@ class Camera {
           int x = i * TilesPerChunkX + k;
           for (int l = 0; l < TilesPerChunkY; l++) {
             int y = j * TilesPerChunkY + l;
-            if (voronoiRepresentation) {
-              TileChunks[i][j].fill(map.VoronoiCell[x][y].CellColor, Transparency);
+            if (voronoiRepresentation && map.VoronoiCell[x][y] != null) {
+              //Draw the cell starting point
+              if (x == (int)map.VoronoiCell[x][y].pos.x && y ==(int)map.VoronoiCell[x][y].pos.y) {
+                TileChunks[i][j].fill(0, Transparency);
+              } else {
+                TileChunks[i][j].fill(map.VoronoiCell[x][y].CellColor, Transparency);
+              }
             } else {
               if (map.grid[x][y] == 0) {
                 TileChunks[i][j].fill(0,Transparency);
@@ -60,11 +89,7 @@ class Camera {
                 TileChunks[i][j].fill(128, Transparency);
               }
             }
-            if (voronoiRepresentation) {
-              if (x == (int)map.VoronoiCell[x][y].pos.x && y ==(int)map.VoronoiCell[x][y].pos.y) {
-                TileChunks[i][j].fill(0, Transparency);
-              }
-            }
+            
             TileChunks[i][j].rect(k * map.tileSizeX, l * map.tileSizeY, map.tileSizeX, map.tileSizeY);
             
           }
@@ -76,6 +101,7 @@ class Camera {
         TileChunks[i][j].endDraw();
       }
     }
+    renderingChunks = false;
   }
   
   
