@@ -115,11 +115,12 @@ class Camera {
     for (int i = iStart; i < iFinish; i++) {
       int iX = i * tileSize;
       for (int j = jStart; j < jFinish; j++) {
-        if (grid[i][j] == 2) {
-          fill(0,128, 255);
-        } else if (grid[i][j] == 3) {
-          fill(128, 128, 255);
-        }
+        //if (grid[i][j] == 2) {
+        //  fill(0,128, 255);
+        //} else if (grid[i][j] == 3) {
+        //  fill(128, 128, 255);
+        //}
+        fill((grid[i][j]/3) % 255);
         rect(iX - pos.x, j*tileSize - pos.y, tileSize, tileSize);
       }
     }

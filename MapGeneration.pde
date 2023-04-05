@@ -34,7 +34,7 @@ Player player;
 
 
 
-
+int[][] dijkstra = new int[1][1];
 
 void setup () {
   size(2048, 1024, P2D);
@@ -103,8 +103,10 @@ void setup () {
   //voronoiGenerator.addGeneratorToBorder(new CellularAutomata(MainMap,4,2,9, 0.3,16));
   
   
-  thread("GenerateMap");
-   //<>//
+  //thread("GenerateMap");
+  GenerateMap();
+  byte[][] walkable = MainMap.GetGrid();
+  dijkstra = dijkstraMap(walkable, 59, 50); //<>//
   
 
   //cameraVoronoi.DrawMap(MainMap, true);
@@ -119,8 +121,8 @@ void setup () {
   //cameraVoronoi.DrawMap(MainMap);
   
   save("random.png");
-  GameObjects.add(player);
-  GameObjects.add(new Enemy(new Vector2(162*MainMap.tileSizeX, 90*MainMap.tileSizeY), MainMap));
+  //GameObjects.add(player);
+  //GameObjects.add(new Enemy(new Vector2(162*MainMap.tileSizeX, 90*MainMap.tileSizeY), MainMap));
   
 }
 /*int igen = 0;
@@ -137,12 +139,13 @@ void draw () {
   MainCamera.DrawMap(MainMap);
   //MainCamera.DrawGrid(voronoiGenerator.cellBorder, 8);
   //MainCamera.DrawGrid(MainMap.Locked, MainMap.tileSizeX);
+  MainCamera.DrawGrid(dijkstra, MainMap.tileSizeX);
   for (int i = GameObjects.size() - 1; i >= 0; i--) {
     GameObject object = GameObjects.get(i);
     object.Update();
     MainCamera.DrawObject(object);
   }
-  MainCamera.MoveTo(player);
+  //MainCamera.MoveTo(player);
   //cameraVoronoi.MoveTo(player);
   
   //print(player.pos.x + "," + player.pos.y + "\n");

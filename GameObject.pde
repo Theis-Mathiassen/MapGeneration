@@ -1,7 +1,7 @@
 class GameObject {
   Vector2 pos = new Vector2(width / 2,height / 2);
-  float w = 1;
-  float h = 1;
+  float w = 4;
+  float h = 4;
   float speed = 1;
   String Tag = "";
   color skin = color(1);

@@ -14,6 +14,9 @@ class Prefab extends Generator {
     }
     for (int i = 0; i < Schematic.length; i++) {
       for (int j = 0; j < Schematic[i].length; j++) {
+        if (x+i < 0 || x+i >= map.tilesX || y+j < 0 || y+j >= map.tilesY) {
+          continue;
+        }
         map.SetGrid(x+i,y+j,Schematic[i][j]);
         CellsToLock[x+i][y+j] = true;
       }
