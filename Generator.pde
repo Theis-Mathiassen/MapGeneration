@@ -203,7 +203,7 @@ class Drunk extends Generator {
   }
   
   void GeneratorFunction (){
-    //print("Drunk"); //<>// //<>// //<>//
+    //print("Drunk"); //<>// //<>//
     int dir = 0;
     pos.x = constrain(pos.x, 1, map.tilesX-2);
     pos.y = constrain(pos.y, 1, map.tilesY-2);
@@ -263,11 +263,11 @@ class CellularAutomata extends Generator {
     this.chanceToSpawn = chanceToSpawn;
     Iterations = iterations;
   }
- //<>// //<>// //<>//
+ //<>// //<>//
   void GeneratorFunction (){
     for (int i = 0; i < Iterations; i++) {
       Iterate(i);
-    } //<>// //<>// //<>//
+    } //<>// //<>//
   }
   byte GetNeighbors (int x, int y, short[][] oldGrid) {
     byte AliveNeighbors = 0;

@@ -60,7 +60,7 @@ class DijkstraMap {
 
 
 private void dijkstraMap(DijkstraMap dMap, short[][] map, int startX, int startY) {
-  int w = map.length; //<>// //<>//
+  int w = map.length; //<>//
   int h = map[0].length;
   
   dMap.distanceMap[startX][startY] = 0;

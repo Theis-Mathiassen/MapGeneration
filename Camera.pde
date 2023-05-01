@@ -1,6 +1,9 @@
 class Camera {
   Vector2 pos;
   Vector2 Size;
+  Vector2 ScreenPos;
+  Vector2 ScreenSize;
+  Vector2 Scale;
   PShape FloorTile;
   
   int Transparency;
@@ -12,16 +15,20 @@ class Camera {
   boolean voronoiRepresentation;
   
   
-  Camera (float x, float y, float w, float h, int transparency, boolean voronoiRepresentation) {
+  Camera (float x, float y, float w, float h, float screenX, float screenY, float screenW, float screenH, int transparency, boolean voronoiRepresentation) {
     pos = new Vector2(x,y);
     Size = new Vector2(w,h);
+    ScreenPos = new Vector2(screenX, screenY);
+    ScreenSize = new Vector2(screenW, screenH);
+    Scale = new Vector2(screenW / w, screenH / h);
     Transparency = transparency;
     //TileChunks = new PGraphics[chunksX][chunksY];
     this.voronoiRepresentation = voronoiRepresentation;
   }
   
   void DrawMap (Map map) {
-    
+    fill(0);
+    rect(ScreenPos.x, ScreenPos.y, ScreenSize.x, ScreenSize.y);
     if (TileChunks == null && renderingChunks == false && map.generated == true) {
       renderingChunks = true;
       this.map = map;
@@ -44,6 +51,7 @@ class Camera {
         
       
     } else {
+      //PImage imageToRender = createImage((int)ScreenSize.x, (int)ScreenSize.y, RGB);
       int iStart = max((int)(pos.x/ChunkSize), 0);
       int iFinish = min(1+(int)(pos.x+Size.x)/ChunkSize, TileChunks.length);
       int jStart = max((int)(pos.y/ChunkSize), 0);
@@ -51,9 +59,11 @@ class Camera {
       for (int i = iStart; i < iFinish; i++) {
         int iX = i * ChunkSize;
         for (int j = jStart; j < jFinish; j++) {
-          image(TileChunks[i][j], iX - pos.x, j * ChunkSize - pos.y);
+          //imageToRender.set((int)(iX - pos.x),(int)(j * ChunkSize - pos.y),(PImage)TileChunks[i][j]);
+          image(TileChunks[i][j], (iX - pos.x) * Scale.x, (j * ChunkSize - pos.y) * Scale.y, ChunkSize * Scale.x, ChunkSize * Scale.y);
         }
       }
+      //image(imageToRender, 0,0);
     }
     
   }
@@ -133,7 +143,7 @@ class Camera {
           //print(MaxDistanceToPath + "\n");
           fill(lerpColor(c1, c2, amt));
         }
-        rect(iX - pos.x, j*tileSize - pos.y, tileSize, tileSize);
+        rect((iX - pos.x) * Scale.x, (j*tileSize - pos.y) * Scale.y, tileSize * Scale.x, tileSize * Scale.y);
       }
     }
   }
@@ -148,7 +158,7 @@ class Camera {
       for (int j = jStart; j < jFinish; j++) {
         if (grid[i][j] == true) {
           fill(0,0, 255);
-          rect(iX - pos.x, j*tileSize - pos.y, tileSize, tileSize);
+          rect((iX - pos.x) * Scale.x, (j*tileSize - pos.y) * Scale.y, tileSize * Scale.x, tileSize * Scale.y);
         } else {
           fill(255, 0, 0);
         }
@@ -171,7 +181,7 @@ class Camera {
           stroke(1);
           int halfSize = tileSize >> 1;
           //line(iX + halfSize - pos.x, jY + halfSize - pos.y, dMap.VertexMap[i][j].prev.x * tileSize + halfSize - pos.x, dMap.VertexMap[i][j].prev.y * tileSize + halfSize - pos.y);
-          drawArrow((int)(iX + halfSize - pos.x), (int)(jY + halfSize - pos.y), (int)(dMap.VertexMap[i][j].prev.x * tileSize + halfSize - pos.x), (int)(dMap.VertexMap[i][j].prev.y * tileSize + halfSize - pos.y));
+          drawArrow((int)((iX + halfSize - pos.x) * Scale.x), (int)((jY + halfSize - pos.y) * Scale.y), (int)((dMap.VertexMap[i][j].prev.x * tileSize + halfSize - pos.x)  * Scale.x), (int)((dMap.VertexMap[i][j].prev.y * tileSize + halfSize - pos.y) * Scale.y));
           noStroke();
         }
       }
@@ -179,11 +189,13 @@ class Camera {
   }
   
   void DrawObject (GameObject obj) {
-    if (obj.Texture == null) { 
-      fill(obj.skin);
-      rect(obj.pos.x - pos.x, obj.pos.y - pos.y, obj.w, obj.h);
-    } else {
-      image(obj.Texture, obj.pos.x - pos.x, obj.pos.y - pos.y, obj.w, obj.h);
+    if (obj.pos.x + obj.w > pos.x && obj.pos.x < pos.x + Size.x && obj.pos.y + obj.h > pos.y && obj.pos.y < pos.y + Size.y) {
+      if (obj.Texture == null) { 
+        fill(obj.skin);
+        rect((obj.pos.x - pos.x) * Scale.x, (obj.pos.y - pos.y) * Scale.y, obj.w * Scale.x, obj.h * Scale.y);
+      } else {
+        image(obj.Texture, (obj.pos.x - pos.x) * Scale.x, (obj.pos.y - pos.y) * Scale.y, obj.w * Scale.x, obj.h * Scale.y);
+      }
     }
   }
   

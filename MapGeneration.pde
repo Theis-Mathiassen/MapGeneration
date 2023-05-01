@@ -1,6 +1,7 @@
 //final int sizeX = 2500;
 //final int sizeY = 1300;
 Camera MainCamera;
+Camera MiniMap;
 //Camera cameraVoronoi;
 boolean GameMode = true;
 
@@ -45,13 +46,14 @@ int MaxDistanceToPath;
 long seed;
 void setup () {
   size(2048, 1024, P2D);
-  MainCamera = new Camera(0,0,width,height, 128, false);
+  MainCamera = new Camera(0,0,width,height, 0, 0, width, height, 255, false);
+  MiniMap = new Camera(0,0,4000,4000,0, 0, 400, 400, 255, false);
   //cameraVoronoi = new Camera(0,0,width,height, 255, true);
   frameRate(60);
   noStroke();
   background(0);
   seed = (long)random(10000);
-  randomSeed(3099);
+  randomSeed(2355);
   
   //player = new Player(MainMap,134*MainMap.tileSizeX, 100*MainMap.tileSizeY);
   player = new Player(MainMap,50*MainMap.tileSizeX, 50*MainMap.tileSizeY);
@@ -151,6 +153,7 @@ void setup () {
   
   background(0);
   MainCamera.DrawMap(MainMap);
+  MiniMap.DrawMap(MainMap);
   //cameraVoronoi.DrawMap(MainMap);
   
   
@@ -194,6 +197,7 @@ void draw () {
   background(0);
   //cameraVoronoi.DrawMap(MainMap);
   MainCamera.DrawMap(MainMap);
+  MiniMap.DrawMap(MainMap);
   //MainCamera.DrawGrid(voronoiGenerator.cellBorder, 8);
   //MainCamera.DrawGrid(MainMap.Locked, MainMap.tileSizeX);
   //MainCamera.DrawGrid(dijkstra.distanceMap, MainMap.tileSizeX);
@@ -209,6 +213,7 @@ void draw () {
       MainCamera.DrawObject(object);
     }
     MainCamera.MoveTo(player);
+    MiniMap.MoveTo(player);
   }
   
   //
@@ -225,9 +230,11 @@ void GenerateMap () {
   MainMap.generated = true;
   print(millis());
   MainCamera.TileChunks = null;
+  MiniMap.TileChunks = null;
 }
 void RenderMap () {
   MainCamera.RenderChunks();
+  MiniMap.RenderChunks();
 }
 
 
@@ -270,7 +277,7 @@ float logn (float x, float n) {
 
 
 void mousePressed () {
-  save("MapImages/NewSeed.png");
+  save("MapImages/test.png");
   //print("Cordinates: " + (int)(mouseX - MainCamera.pos.x) / MainMap.tileSizeX + ", " + (int)(mouseY - MainCamera.pos.y) / MainMap.tileSizeY);
   //GenerateNext();
 }
