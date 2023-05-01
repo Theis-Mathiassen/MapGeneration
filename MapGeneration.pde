@@ -47,7 +47,7 @@ long seed;
 void setup () {
   size(2048, 1024, P2D);
   MainCamera = new Camera(0,0,width,height, 0, 0, width, height, 255, false);
-  MiniMap = new Camera(0,0,4000,4000,0, 0, 400, 400, 255, false);
+  MiniMap = new Camera(0,0,4000,4000,width-400, 0, 400, 400, 255, false);
   //cameraVoronoi = new Camera(0,0,width,height, 255, true);
   frameRate(60);
   noStroke();

@@ -56,13 +56,17 @@ class Camera {
       int iFinish = min(1+(int)(pos.x+Size.x)/ChunkSize, TileChunks.length);
       int jStart = max((int)(pos.y/ChunkSize), 0);
       int jFinish = min(1+(int)(pos.y+Size.y)/ChunkSize, TileChunks[0].length);
+      pushMatrix();
+      translate(ScreenPos.x, ScreenPos.y);
+      scale(Scale.x, Scale.y);
       for (int i = iStart; i < iFinish; i++) {
         int iX = i * ChunkSize;
         for (int j = jStart; j < jFinish; j++) {
           //imageToRender.set((int)(iX - pos.x),(int)(j * ChunkSize - pos.y),(PImage)TileChunks[i][j]);
-          image(TileChunks[i][j], (iX - pos.x) * Scale.x, (j * ChunkSize - pos.y) * Scale.y, ChunkSize * Scale.x, ChunkSize * Scale.y);
+          image(TileChunks[i][j], iX - pos.x, j * ChunkSize - pos.y, ChunkSize, ChunkSize);
         }
       }
+      popMatrix();
       //image(imageToRender, 0,0);
     }
     
