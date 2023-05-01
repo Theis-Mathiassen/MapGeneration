@@ -22,11 +22,11 @@ public class MazeSolver {
     }
 
     public boolean solve() {
-        return traverse(0,0); //<>// //<>// //<>//
+        return traverse(0,0); //<>// //<>// //<>// //<>//
     }
 
     private boolean traverse(int i, int j) {
-        if (!isValid(i,j)) { //<>// //<>// //<>//
+        if (!isValid(i,j)) { //<>// //<>// //<>// //<>//
             return false;
         }
 
@@ -62,11 +62,11 @@ public class MazeSolver {
     }
 
     private boolean isEnd(int i, int j) {
-        return i == EndX && j == EndY; //<>// //<>// //<>//
+        return i == EndX && j == EndY; //<>// //<>// //<>// //<>//
     }
 
     private boolean isValid(int i, int j) {
-        if (inRange(i, j) && isOpen(i, j) && !isTried(i, j)) { //<>// //<>// //<>//
+        if (inRange(i, j) && isOpen(i, j) && !isTried(i, j)) { //<>// //<>// //<>// //<>//
             return true;
         }
 

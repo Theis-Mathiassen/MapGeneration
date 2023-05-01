@@ -2,19 +2,22 @@ class Enemy extends GameObject {
   Raycast LineOfSight;
   Vector2 LastSeenPlayer;
   Enemy (Map map) {
-    this(new Vector2(10, 10), map);
+    this(map, new Vector2(10, 10), "");
   }
-  Enemy (Vector2 pos, Map map) {
-    super(map);
+  Enemy (Map map, Vector2 pos, String asset) {
+    super(map, pos.x, pos.y, asset);
     this.pos = pos;
     skin = color(0, 255, 0);
-    speed = 0.55;
+    speed = 3;
     LastSeenPlayer = new Vector2(pos.x, pos.y);
   }
   
   public void Update () {
     super.Update();
     ScanPlayer(player, MainMap, 0);
+    if (CheckCollision(player)) {
+      player.dead = true;
+    }
   }
   
   void ScanPlayer (Player player, Map map, int ObstructionValue) {
@@ -23,7 +26,10 @@ class Enemy extends GameObject {
     if (hit) {
       LastSeenPlayer = LineOfSight.Hit;
     }
-    Move(LastSeenPlayer.subtract(new Vector2(pos.x + w/2, pos.y + h/2)));
+    Vector2 moveAction = LastSeenPlayer.subtract(new Vector2(pos.x + w/2, pos.y + h/2));
+    if (moveAction.length() > speed) {
+      Move(moveAction);
+    }
     /*if (LastSeenPlayer.x - pos.x < 0) {
       MoveLeft();
     } else {

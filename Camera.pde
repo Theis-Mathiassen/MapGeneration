@@ -27,7 +27,7 @@ class Camera {
       this.map = map;
       thread("RenderMap");
     }
-    if (TileChunks == null || renderingChunks == true) { //<>//
+    if (TileChunks == null || renderingChunks == true) {
       String displayText;
       if (map.generated == true) {
         displayText = "Drawing";
@@ -112,6 +112,8 @@ class Camera {
     int jStart = max((int)pos.y/tileSize, 0);
     int jFinish = min(1+(int)(pos.y+Size.y)/tileSize, grid[0].length);
     //byte[][] grid = map.GetGrid();
+    color c1 = color(255, 0, 0);
+    color c2 = color(0, 0, 255);
     for (int i = iStart; i < iFinish; i++) {
       int iX = i * tileSize;
       for (int j = jStart; j < jFinish; j++) {
@@ -120,7 +122,17 @@ class Camera {
         //} else if (grid[i][j] == 3) {
         //  fill(128, 128, 255);
         //}
-        fill((grid[i][j]/3) % 255);
+        //print((int)(log((grid[i][j]+1))*5) + "\n");
+        float amt = (float)grid[i][j] / MaxDistanceToPath;
+        //amt = log(amt+0.17)/2+0.92;
+        if (grid[i][j] == Integer.MAX_VALUE) {
+          fill(0);
+        } else if (grid[i][j] == 0) {
+          fill(255);
+        } else {
+          //print(MaxDistanceToPath + "\n");
+          fill(lerpColor(c1, c2, amt));
+        }
         rect(iX - pos.x, j*tileSize - pos.y, tileSize, tileSize);
       }
     }
@@ -145,9 +157,34 @@ class Camera {
     }
   }
   
+  void DrawDijkstraMapPath (DijkstraMap dMap, int tileSize) {
+    int iStart = max((int)pos.x/tileSize, 0);
+    int iFinish = min(1+(int)(pos.x+Size.x)/tileSize, dMap.VertexMap.length);
+    int jStart = max((int)pos.y/tileSize, 0);
+    int jFinish = min(1+(int)(pos.y+Size.y)/tileSize, dMap.VertexMap[0].length);
+    //byte[][] grid = map.GetGrid();
+    for (int i = iStart; i < iFinish; i++) {
+      int iX = i * tileSize;
+      for (int j = jStart; j < jFinish; j++) {
+        int jY = j * tileSize;
+        if (dMap.VertexMap[i][j] != null && dMap.VertexMap[i][j].prev != null) {
+          stroke(1);
+          int halfSize = tileSize >> 1;
+          //line(iX + halfSize - pos.x, jY + halfSize - pos.y, dMap.VertexMap[i][j].prev.x * tileSize + halfSize - pos.x, dMap.VertexMap[i][j].prev.y * tileSize + halfSize - pos.y);
+          drawArrow((int)(iX + halfSize - pos.x), (int)(jY + halfSize - pos.y), (int)(dMap.VertexMap[i][j].prev.x * tileSize + halfSize - pos.x), (int)(dMap.VertexMap[i][j].prev.y * tileSize + halfSize - pos.y));
+          noStroke();
+        }
+      }
+    }
+  }
+  
   void DrawObject (GameObject obj) {
-    fill(obj.skin);
-    rect(obj.pos.x - pos.x, obj.pos.y - pos.y, obj.w, obj.h);
+    if (obj.Texture == null) { 
+      fill(obj.skin);
+      rect(obj.pos.x - pos.x, obj.pos.y - pos.y, obj.w, obj.h);
+    } else {
+      image(obj.Texture, obj.pos.x - pos.x, obj.pos.y - pos.y, obj.w, obj.h);
+    }
   }
   
   void MoveTo (GameObject obj) {

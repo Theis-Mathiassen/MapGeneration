@@ -2,7 +2,11 @@
 //final int sizeY = 1300;
 Camera MainCamera;
 //Camera cameraVoronoi;
+boolean GameMode = true;
+
 Map MainMap = new Map();
+
+
 
 //Generators
 //Drunk drunk = new Drunk(MainMap,MainMap.tilesX * 2 / 4, MainMap.tilesY * 2 / 4, 30, true);
@@ -34,8 +38,11 @@ Player player;
 
 
 
-int[][] dijkstra = new int[1][1];
+DijkstraMap dijkstra = new DijkstraMap(MainMap.tilesX, MainMap.tilesY);
+int MaxDistanceToPath;
 
+
+long seed;
 void setup () {
   size(2048, 1024, P2D);
   MainCamera = new Camera(0,0,width,height, 128, false);
@@ -43,9 +50,12 @@ void setup () {
   frameRate(60);
   noStroke();
   background(0);
-  randomSeed(0);
+  seed = (long)random(10000);
+  randomSeed(3099);
   
-  player = new Player(MainMap, 59*MainMap.tileSizeX, 50*MainMap.tileSizeY);
+  //player = new Player(MainMap,134*MainMap.tileSizeX, 100*MainMap.tileSizeY);
+  player = new Player(MainMap,50*MainMap.tileSizeX, 50*MainMap.tileSizeY);
+  
   
   drunk2 = new Drunk(MainMap,130, 120, 90000, true, true);
   Drunk drunk21 = new Drunk(MainMap,130, 120, 40000, true, true);
@@ -62,14 +72,14 @@ void setup () {
   
   voronoiGenerator = new Voronoi(MainMap, 5, true, 10, true);
   
-  PImage CastleIMG = loadImage("Castle.png");
+  PImage CastleIMG = loadImage("Assets/Castle.png");
   byte[][] CastleSCH = new byte[0][0];
   if (CastleIMG != null) {
     CastleSCH = Img2Schematic(CastleIMG);
   }
   Castle = new Prefab(MainMap, 30, 30,CastleSCH,true);
   
-  PImage CaveImage = loadImage("Outpost.png");
+  PImage CaveImage = loadImage("Assets/Outpost.png");
   byte[][] CaveSCH = new byte[0][0];
   if (CaveImage != null) {
     CaveSCH = Img2Schematic(CaveImage);
@@ -91,7 +101,7 @@ void setup () {
   voronoiGenerator.addGeneratorToCell(2, LowNoise2);
   
   drunk21.pos.x = voronoiGenerator.cells[3].pos.x;
-  drunk21.pos.y = voronoiGenerator.cells[3].pos.y; //<>// //<>//
+  drunk21.pos.y = voronoiGenerator.cells[3].pos.y;
   voronoiGenerator.addGeneratorToCell(3, drunk21);
   drunk2.pos.x = voronoiGenerator.cells[4].pos.x;
   drunk2.pos.y = voronoiGenerator.cells[4].pos.y;
@@ -105,8 +115,31 @@ void setup () {
   
   //thread("GenerateMap");
   GenerateMap();
-  byte[][] walkable = MainMap.GetGrid();
-  dijkstra = dijkstraMap(walkable, 59, 50); //<>//
+  short[][] walkable = MainMap.GetGrid();
+  /*for (int i = 0; i < MainMap.tilesX; i++) {
+    for (int j = 0; j < MainMap.tilesY; j++) {
+      if (walkable[i][j] == 0) {
+        walkable[i][j] = 1000;
+      }
+    }
+  }*/
+  dijkstra.calcMap(walkable, 59, 50);
+  
+  int shortestPath = dijkstra.distanceMap[431][188];
+  int hotPathWidth = 16;
+  int outsideHotPathValue = 500;
+  dijkstra.calcDistanceToHotPath(walkable, 431, 188);
+  for (int i = 0; i < MainMap.tilesX; i++) {
+    for (int j = 0; j < MainMap.tilesY; j++) {
+      if (dijkstra.distanceMap[i][j] > hotPathWidth && dijkstra.distanceMap[i][j] != Integer.MAX_VALUE) {
+        dijkstra.distanceMap[i][j] = outsideHotPathValue;
+      }
+    }
+  }
+    //
+  
+  
+  
   
 
   //cameraVoronoi.DrawMap(MainMap, true);
@@ -120,10 +153,34 @@ void setup () {
   MainCamera.DrawMap(MainMap);
   //cameraVoronoi.DrawMap(MainMap);
   
-  save("random.png");
-  //GameObjects.add(player);
-  //GameObjects.add(new Enemy(new Vector2(162*MainMap.tileSizeX, 90*MainMap.tileSizeY), MainMap));
   
+  GameObjects.add(player);
+  
+  long totalTiles = MainMap.tilesX * MainMap.tilesY;
+  long reachableTiles = 0;
+  float averageDistaceFromPath = 0;
+  for (int i = 0; i < MainMap.tilesX; i++) {
+    for (int j = 0; j < MainMap.tilesY; j++) {
+      boolean reachable = (dijkstra.distanceMap[i][j] != Integer.MAX_VALUE);
+      
+      if(reachable) {
+        reachableTiles += 1;
+        averageDistaceFromPath += dijkstra.distanceMap[i][j];
+        MaxDistanceToPath = MaxDistanceToPath < dijkstra.distanceMap[i][j] ? dijkstra.distanceMap[i][j] : MaxDistanceToPath;
+      }
+      if (random(1) < 0.004 && dijkstra.distanceMap[i][j] == outsideHotPathValue && reachable && GameMode) {
+        GameObjects.add(new Enemy(MainMap, new Vector2(i*MainMap.tileSizeX, j*MainMap.tileSizeY), ""));
+      }
+    }
+  }
+  averageDistaceFromPath = averageDistaceFromPath / reachableTiles;
+  
+  
+  print("\n");
+  print("Seed: " + seed + "\n");
+  print("Percent reachableTiles: " + (float)reachableTiles/totalTiles * 100 + "%\n");
+  print("Shortest path: " + shortestPath + "\n");
+  print("Average distance from path: " + averageDistaceFromPath + "\n");
 }
 /*int igen = 0;
 void GenerateNext () {
@@ -139,13 +196,22 @@ void draw () {
   MainCamera.DrawMap(MainMap);
   //MainCamera.DrawGrid(voronoiGenerator.cellBorder, 8);
   //MainCamera.DrawGrid(MainMap.Locked, MainMap.tileSizeX);
-  MainCamera.DrawGrid(dijkstra, MainMap.tileSizeX);
-  for (int i = GameObjects.size() - 1; i >= 0; i--) {
-    GameObject object = GameObjects.get(i);
-    object.Update();
-    MainCamera.DrawObject(object);
+  //MainCamera.DrawGrid(dijkstra.distanceMap, MainMap.tileSizeX);
+  //MainCamera.DrawDijkstraMapPath(dijkstra, MainMap.tileSizeX);
+  if (GameMode) {
+    for (int i = GameObjects.size() - 1; i >= 0; i--) {
+      GameObject object = GameObjects.get(i);
+      if (object.dead == true) {
+        GameObjects.remove(object);
+        continue;
+      }
+      object.Update();
+      MainCamera.DrawObject(object);
+    }
+    MainCamera.MoveTo(player);
   }
-  //MainCamera.MoveTo(player);
+  
+  //
   //cameraVoronoi.MoveTo(player);
   
   //print(player.pos.x + "," + player.pos.y + "\n");
@@ -183,8 +249,29 @@ byte[][] Img2Schematic (PImage img) {
   return result;
 }
 
+
+void drawArrow(int cx, int cy, int len, float angle){
+  pushMatrix();
+  translate(cx, cy);
+  rotate(angle);
+  line(0,0,len, 0);
+  
+  line(len, 0, len - (len>>2), -(len>>2));
+  line(len, 0, len - (len>>2), (len>>2));
+  popMatrix();
+}
+void drawArrow(int cx, int cy, int x2, int y2){
+  drawArrow(cx, cy, (int)sqrt((cx-x2)*(cx-x2)+(cy-y2)*(cy-y2)), atan2(y2-cy, x2-cx));
+}
+// Calculates the base-10 logarithm of a number
+float logn (float x, float n) {
+  return (log(x) / log(n));
+}
+
+
 void mousePressed () {
-  //print(Cell.GetNeighbors((int)(mouseX - MainCamera.Pos.x) / MainMap.tileSizeX, (int)(mouseY - MainCamera.Pos.y) / MainMap.tileSizeY, MainMap.GetGrid()));
+  save("MapImages/NewSeed.png");
+  //print("Cordinates: " + (int)(mouseX - MainCamera.pos.x) / MainMap.tileSizeX + ", " + (int)(mouseY - MainCamera.pos.y) / MainMap.tileSizeY);
   //GenerateNext();
 }
 void keyPressed() {

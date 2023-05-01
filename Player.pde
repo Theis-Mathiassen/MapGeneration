@@ -1,9 +1,9 @@
 class Player extends GameObject {
   Player (Map map, float x, float y) {
-    super(map, x, y);
+    super(map, x, y, "");
     Tag = "Player";
-    skin = color(255, 0, 0);
-    speed = 10;
+    skin = color(255, 255, 0);
+    speed = 4;
   }
   void move () {
     Vector2 dir = new Vector2();

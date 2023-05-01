@@ -1,12 +1,12 @@
 
 class Map {
   //Tile size and Chunksize, can not be relatively prime.
-  int tileSizeX = 4;
-  int tileSizeY = 4;  
+  int tileSizeX;
+  int tileSizeY;  
   int tilesX = 512;//sizeX / tileSizeX;
   int tilesY = 256;//sizeY / tileSizeY;
   boolean generated = false;
-  private byte[][] grid = new byte[tilesX][tilesY];    //0 = Wall & 1 = Walkable(Floor)
+  private short[][] grid = new short[tilesX][tilesY];    //0 = Wall & 1 = Walkable(Floor)
   
   VoronoiCell[][] VoronoiCell = new VoronoiCell[tilesX][tilesY];
   
@@ -14,6 +14,14 @@ class Map {
   byte[][] Region = new byte[tilesX][tilesY];  //0 = Region0 & 1 = Region1 osv.
   Stack<boolean[][]> LockedStates = new Stack<boolean[][]>();
   
+  public Map() {
+    if (GameMode) {
+      tileSizeX = 16;
+      tileSizeY = 16;
+      print("Hello2");
+    }
+    print("Hello");
+  }
   
   Vector2 PosToTile (Vector2 pos) {
     return new Vector2(floor(pos.x / tileSizeX), floor(pos.y / tileSizeY));
@@ -31,8 +39,8 @@ class Map {
     grid[x][y] = val;
     return true;
   }
-  byte[][] GetGrid() {
-    byte[][] result = new byte[tilesX][tilesY];
+  short[][] GetGrid() {
+    short[][] result = new short[tilesX][tilesY];
     for (int i = 0; i < tilesX; i++) {
       for (int j = 0; j < tilesY; j++) {
         result[i][j] = grid[i][j];
@@ -40,7 +48,7 @@ class Map {
     }
     return result;
   }
-  byte GetGrid (int x, int y) {
+  short GetGrid (int x, int y) {
     return grid[x][y];
   }
   //Push old locked state and assign new.

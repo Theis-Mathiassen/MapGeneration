@@ -3,28 +3,99 @@ class Raycast {
   Vector2 Target;
   Vector2 Hit;
   Vector2 heading;
+  
+  float tmpX;
+  float tmpY;
+  int currentTileX;
+  int currentTileY;
+  
   Raycast (Vector2 Source, Vector2 Target) {
     this.Source = Source;
     this.Target = Target;
     heading = Target.subtract(Source).normalize();
   }
   
-  boolean Calculate (byte[][] map, int tileSize, int obstructionValue) {
+  boolean Calculate (short[][] map, int tileSize, int obstructionValue) {
     
     
     //print(heading + "\n");
     
-    float tmpX = Source.x;
-    float tmpY = Source.y;
+    tmpX = Source.x;
+    tmpY = Source.y;
     
-    int currentTileX = floor(tmpX) / tileSize;
-    int currentTileY = floor(tmpY) / tileSize;
+    currentTileX = floor(tmpX) / tileSize;
+    currentTileY = floor(tmpY) / tileSize;
     
     boolean targetReached = false;
     
     while (targetReached == false) {
+      targetReached = CalculateStep(tileSize);
+      try {
+        if (heading.x > 0) {
+          if (heading.y > 0) {
+            if (map[currentTileX][currentTileY] == obstructionValue) {
+              Hit = new Vector2(tmpX, tmpY);
+              return false;
+            }
+          } else {
+            if (tmpY / tileSize == currentTileY) {
+              if (map[currentTileX][currentTileY-1] == obstructionValue) {
+                Hit = new Vector2(tmpX, tmpY);
+                return false;
+              }
+            } else {
+              if (map[currentTileX][currentTileY] == obstructionValue) {
+                Hit = new Vector2(tmpX, tmpY);
+                return false;
+              }
+            }
+          }
+        }
+        else {
+          if (heading.y > 0) {
+            if (tmpX / tileSize == currentTileX) {
+              if (map[currentTileX-1][currentTileY] == obstructionValue) {
+                Hit = new Vector2(tmpX, tmpY);
+                return false;
+              }
+            } else {
+              if (map[currentTileX][currentTileY] == obstructionValue) {
+                Hit = new Vector2(tmpX, tmpY);
+                return false;
+              }
+            }
+          } else {
+            if (tmpX / tileSize == currentTileX) {
+              if (map[currentTileX-1][currentTileY] == obstructionValue) {
+                Hit = new Vector2(tmpX, tmpY);
+                return false;
+              }
+            } else if (tmpY / tileSize == currentTileY) {
+              if (map[currentTileX][currentTileY-1] == obstructionValue) {
+                Hit = new Vector2(tmpX, tmpY);
+                return false;
+              }
+            } else {
+              if (map[currentTileX][currentTileY] == obstructionValue) {
+                Hit = new Vector2(tmpX, tmpY);
+                return false;
+              }
+            }  
+          }
+        }
+        
+      } catch(ArrayIndexOutOfBoundsException e) {
+        Hit = new Vector2(tmpX, tmpY);
+        return false;
+      }
       
-      float nearestXBorder;
+    } //<>// //<>// //<>// //<>//
+    Hit = new Vector2(Target.x, Target.y);
+    return true;
+  }
+  
+  boolean CalculateStep (int tileSize) {
+    float nearestXBorder;
       if (heading.x == 0) {
         nearestXBorder = Float.MAX_VALUE;
       } else {
@@ -59,21 +130,18 @@ class Raycast {
       float distToNearestYBorder = (heading.y > 0 ? nearestYBorder - tmpY : tmpY - nearestYBorder );
       
       if (nearestXBorder == Float.NaN && nearestYBorder == Float.NaN) {
-        targetReached = true; //<>//
-        break;
+        return true;
       } else if (nearestXBorder == Float.NaN) {
         //Check if overshoot
-        if ((tmpY <= Target.y && Target.y <= nearestYBorder) || (tmpY >= Target.y && Target.y >= nearestYBorder)) { //<>//
-          targetReached = true;
-          break;
+        if ((tmpY <= Target.y && Target.y <= nearestYBorder) || (tmpY >= Target.y && Target.y >= nearestYBorder)) {
+          return true;
         }
         tmpY = nearestYBorder;
         
       } else if (nearestYBorder == Float.NaN) {
         //Check if overshoot
-        if ((tmpX <= Target.x && Target.x <= nearestXBorder) || (tmpX >= Target.x && Target.x >= nearestXBorder)) { //<>//
-          targetReached = true;
-          break;
+        if ((tmpX <= Target.x && Target.x <= nearestXBorder) || (tmpX >= Target.x && Target.x >= nearestXBorder)) {
+          return true;
         }
         tmpX = nearestXBorder;
       } else {
@@ -89,16 +157,14 @@ class Raycast {
         if (stepsToXBorder < stepsToYBorder) {
           //Check if overshoot
           if ((tmpX <= Target.x && Target.x <= nearestXBorder) || (tmpX >= Target.x && Target.x >= nearestXBorder)) {
-            targetReached = true;
-            break;
+            return true;
           }
           tmpX += heading.x * stepsToXBorder;
           tmpY += heading.y * stepsToXBorder;
         } else {
           //Check if overshoot
           if ((tmpY <= Target.y && Target.y <= nearestYBorder) || (tmpY >= Target.y && Target.y >= nearestYBorder)) {
-            targetReached = true;
-            break;
+            return true;
           }
           tmpY += heading.y * stepsToYBorder;
           tmpX += heading.x * stepsToYBorder;
@@ -106,26 +172,19 @@ class Raycast {
       }
       currentTileX = floor(tmpX) / tileSize;
       currentTileY = floor(tmpY) / tileSize;
-      circle(tmpX - MainCamera.pos.x, tmpY - MainCamera.pos.y, 2);
-      try {
-        rect(currentTileX * tileSize - MainCamera.pos.x, currentTileY * tileSize - MainCamera.pos.y, tileSize, tileSize);
-        if (map[currentTileX][currentTileY] == obstructionValue) {
-          Hit = new Vector2(tmpX, tmpY);
-          return false;
-        }
-      } catch(ArrayIndexOutOfBoundsException e) {
-        Hit = new Vector2(tmpX, tmpY);
-        return false;
-      }
+      //stroke(0);
+      //fill(255, 0, 0);
+      //circle(tmpX - MainCamera.pos.x, tmpY - MainCamera.pos.y, 4);
+      //noStroke();
+      
+      //rect(currentTileX * tileSize - MainCamera.pos.x, currentTileY * tileSize - MainCamera.pos.y, tileSize, tileSize);
+       return false;
       //print(heading.x + "\n");
-    }
-    Hit = new Vector2(Target.x, Target.y);
-    return true;
   }
   
   void Draw () {
-    stroke(0);
-    line(Source.x - MainCamera.pos.x, Source.y - MainCamera.pos.y, Hit.x - MainCamera.pos.x, Hit.y - MainCamera.pos.y);
-    noStroke();
+    //stroke(0);
+    //line(Source.x - MainCamera.pos.x, Source.y - MainCamera.pos.y, Hit.x - MainCamera.pos.x, Hit.y - MainCamera.pos.y);
+    //noStroke();
   }
 }
