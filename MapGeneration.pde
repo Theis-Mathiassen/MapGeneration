@@ -53,7 +53,7 @@ void setup () {
   noStroke();
   background(0);
   seed = (long)random(10000);
-  randomSeed(seed);
+  randomSeed(0);
   
   //player = new Player(MainMap,134*MainMap.tileSizeX, 100*MainMap.tileSizeY);
   player = new Player(MainMap,50*MainMap.tileSizeX, 50*MainMap.tileSizeY);
@@ -152,7 +152,16 @@ void draw () {
       object.Update();
       MainCamera.DrawObject(object);
     }
-    MainCamera.MoveTo(player);
+    if (InputSystem.keys[' '] == 1) {
+      MainCamera.MoveTo(player);
+    }
+    
+    //UI
+    pushMatrix();
+    fill(255);
+    textSize(24);
+    text("You move on W, A, S and D, and have the camera follow with space.", 20, 30);
+    popMatrix();
     //MiniMap.MoveTo(player);
   }
   
