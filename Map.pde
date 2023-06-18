@@ -3,8 +3,8 @@ class Map {
   //Tile size and Chunksize, can not be relatively prime.
   int tileSizeX;
   int tileSizeY;  
-  int tilesX = 512;//sizeX / tileSizeX;
-  int tilesY = 256;//sizeY / tileSizeY;
+  int tilesX = 1*2048;//sizeX / tileSizeX;
+  int tilesY = 1*1024;//sizeY / tileSizeY;
   boolean generated = false;
   private short[][] grid = new short[tilesX][tilesY];    //0 = Wall & 1 = Walkable(Floor)
   

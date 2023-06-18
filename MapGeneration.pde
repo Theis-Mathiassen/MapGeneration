@@ -53,7 +53,7 @@ void setup () {
   noStroke();
   background(0);
   seed = (long)random(10000);
-  randomSeed(2355);
+  randomSeed(seed);
   
   //player = new Player(MainMap,134*MainMap.tileSizeX, 100*MainMap.tileSizeY);
   player = new Player(MainMap,50*MainMap.tileSizeX, 50*MainMap.tileSizeY);
@@ -115,8 +115,58 @@ void setup () {
   //voronoiGenerator.addGeneratorToBorder(new CellularAutomata(MainMap,4,2,9, 0.3,16));
   
   
-  //thread("GenerateMap");
-  GenerateMap();
+  GameObjects.add(player);
+  
+  thread("GenerateMap");
+  //GenerateMap();
+  
+  
+  print("\n");
+  print("Seed: " + seed + "\n");
+  
+}
+/*int igen = 0;
+void GenerateNext () {
+  voronoiGenerator.ChildGenerators.get(igen).Generate();
+  igen++;
+  
+  MainCamera.DrawGrid(MainMap.Locked, MainMap.tileSizeX);
+}*/
+
+void draw () {
+  background(0);
+  //cameraVoronoi.DrawMap(MainMap);
+  MainCamera.DrawMap(MainMap);
+  //MiniMap.DrawMap(MainMap);
+  //MainCamera.DrawGrid(voronoiGenerator.cellBorder, 8);
+  //MainCamera.DrawGrid(MainMap.Locked, MainMap.tileSizeX);
+  //MainCamera.DrawGrid(dijkstra.distanceMap, MainMap.tileSizeX);
+  //MainCamera.DrawDijkstraMapPath(dijkstra, MainMap.tileSizeX);
+  if (GameMode) {
+    for (int i = GameObjects.size() - 1; i >= 0; i--) {
+      GameObject object = GameObjects.get(i);
+      if (object.dead == true) {
+        GameObjects.remove(object);
+        continue;
+      }
+      object.Update();
+      MainCamera.DrawObject(object);
+    }
+    MainCamera.MoveTo(player);
+    //MiniMap.MoveTo(player);
+  }
+  
+  //cameraVoronoi.MoveTo(player);
+  
+  //print(player.pos.x + "," + player.pos.y + "\n");
+  
+  //text(frameRate,5,10);
+}
+
+void GenerateMap () {
+  print(millis());
+  Castle.Generate();
+  print("Finished map gen, started shortest path...");
   short[][] walkable = MainMap.GetGrid();
   /*for (int i = 0; i < MainMap.tilesX; i++) {
     for (int j = 0; j < MainMap.tilesY; j++) {
@@ -138,12 +188,7 @@ void setup () {
       }
     }
   }
-    //
   
-  
-  
-  
-
   //cameraVoronoi.DrawMap(MainMap, true);
   //MainCamera.DrawMap(MainMap, false);
   
@@ -151,13 +196,13 @@ void setup () {
   //MZ = new MazeSolver(MainMap.GetGrid());
   //MZ.traverse(30, 30);
   
-  background(0);
-  MainCamera.DrawMap(MainMap);
-  MiniMap.DrawMap(MainMap);
+  //background(0);
+  //MainCamera.DrawMap(MainMap);
+  //MiniMap.DrawMap(MainMap);
   //cameraVoronoi.DrawMap(MainMap);
   
   
-  GameObjects.add(player);
+  
   
   long totalTiles = MainMap.tilesX * MainMap.tilesY;
   long reachableTiles = 0;
@@ -178,63 +223,18 @@ void setup () {
   }
   averageDistaceFromPath = averageDistaceFromPath / reachableTiles;
   
-  
-  print("\n");
-  print("Seed: " + seed + "\n");
   print("Percent reachableTiles: " + (float)reachableTiles/totalTiles * 100 + "%\n");
   print("Shortest path: " + shortestPath + "\n");
   print("Average distance from path: " + averageDistaceFromPath + "\n");
-}
-/*int igen = 0;
-void GenerateNext () {
-  voronoiGenerator.ChildGenerators.get(igen).Generate();
-  igen++;
   
-  MainCamera.DrawGrid(MainMap.Locked, MainMap.tileSizeX);
-}*/
-
-void draw () {
-  background(0);
-  //cameraVoronoi.DrawMap(MainMap);
-  MainCamera.DrawMap(MainMap);
-  MiniMap.DrawMap(MainMap);
-  //MainCamera.DrawGrid(voronoiGenerator.cellBorder, 8);
-  //MainCamera.DrawGrid(MainMap.Locked, MainMap.tileSizeX);
-  //MainCamera.DrawGrid(dijkstra.distanceMap, MainMap.tileSizeX);
-  //MainCamera.DrawDijkstraMapPath(dijkstra, MainMap.tileSizeX);
-  if (GameMode) {
-    for (int i = GameObjects.size() - 1; i >= 0; i--) {
-      GameObject object = GameObjects.get(i);
-      if (object.dead == true) {
-        GameObjects.remove(object);
-        continue;
-      }
-      object.Update();
-      MainCamera.DrawObject(object);
-    }
-    MainCamera.MoveTo(player);
-    MiniMap.MoveTo(player);
-  }
-  
-  //
-  //cameraVoronoi.MoveTo(player);
-  
-  //print(player.pos.x + "," + player.pos.y + "\n");
-  
-  //text(frameRate,5,10);
-}
-
-void GenerateMap () {
-  print(millis());
-  Castle.Generate();
   MainMap.generated = true;
   print(millis());
   MainCamera.TileChunks = null;
-  MiniMap.TileChunks = null;
+  //MiniMap.TileChunks = null;
 }
 void RenderMap () {
   MainCamera.RenderChunks();
-  MiniMap.RenderChunks();
+  //MiniMap.RenderChunks();
 }
 
 

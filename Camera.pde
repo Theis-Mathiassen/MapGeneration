@@ -27,14 +27,20 @@ class Camera {
   }
   
   void DrawMap (Map map) {
-    fill(0);
-    rect(ScreenPos.x, ScreenPos.y, ScreenSize.x, ScreenSize.y);
-    if (TileChunks == null && renderingChunks == false && map.generated == true) {
+    if (renderingChunks == false && map.generated == true) {
       renderingChunks = true;
       this.map = map;
       thread("RenderMap");
     }
-    if (TileChunks == null || renderingChunks == true) {
+    
+    fill(0);
+    rect(ScreenPos.x, ScreenPos.y, ScreenSize.x, ScreenSize.y);
+    //if (TileChunks == null && renderingChunks == false && map.generated == true) {
+    //  renderingChunks = true;
+    //  this.map = map;
+    //  thread("RenderMap");
+    //}
+    /*if (TileChunks == null || renderingChunks == true) {
       String displayText;
       if (map.generated == true) {
         displayText = "Drawing";
@@ -50,7 +56,8 @@ class Camera {
       }
         
       
-    } else {
+    } else {*/
+    if (TileChunks != null) {
       //PImage imageToRender = createImage((int)ScreenSize.x, (int)ScreenSize.y, RGB);
       int iStart = max((int)(pos.x/ChunkSize), 0);
       int iFinish = min(1+(int)(pos.x+Size.x)/ChunkSize, TileChunks.length);
@@ -63,6 +70,15 @@ class Camera {
         int iX = i * ChunkSize;
         for (int j = jStart; j < jFinish; j++) {
           //imageToRender.set((int)(iX - pos.x),(int)(j * ChunkSize - pos.y),(PImage)TileChunks[i][j]);
+          if (TileChunks[i][j] == null) {
+            print("Error, missing tilechunks. Trying to render it, or waiting for it to be rendered.");
+            if (renderingChunks == false) {
+              print("Render");
+              RenderChunks();
+            } else {
+              return;
+            }
+          }
           image(TileChunks[i][j], iX - pos.x, j * ChunkSize - pos.y, ChunkSize, ChunkSize);
         }
       }
@@ -72,47 +88,62 @@ class Camera {
     
   }
   
+  //Can be optimized by only checking the chunks that differed from last time it was called.
   public void RenderChunks () {
-    print("Rendering");
+    //print("Rendering");
     int chunksX = (map.tilesX * map.tileSizeX) / ChunkSize;
     int chunksY = (map.tilesY * map.tileSizeY) / ChunkSize;
-    TileChunks = new PGraphics[chunksX][chunksY];
+    
+    int renderChunkmargin = 2;  //The amount of chunks around the camera to keep in memory. Higher margin gives less rerendering but requires more memory.
+    
+    int startVisibleXChunk = max(0, floor(pos.x / ChunkSize) - renderChunkmargin);
+    int startVisibleYChunk = max(0, floor(pos.y / ChunkSize) - renderChunkmargin);
+    int lastVisibleXChunk = min(chunksX, ceil((pos.x + Size.x) / ChunkSize) + renderChunkmargin);
+    int lastVisibleYChunk = min(chunksY, ceil((pos.y + Size.y) / ChunkSize) + renderChunkmargin);
+    if (TileChunks == null) {
+      TileChunks = new PGraphics[chunksX][chunksY];
+    }
+    int TilesPerChunkX = ChunkSize / map.tileSizeX;
+    int TilesPerChunkY = ChunkSize / map.tileSizeY;
     for (int i = 0; i < chunksX; i++) {
       for (int j = 0; j < chunksY; j++) {
-        TileChunks[i][j] = createGraphics(ChunkSize, ChunkSize);
-        int TilesPerChunkX = ChunkSize / map.tileSizeX;
-        int TilesPerChunkY = ChunkSize / map.tileSizeY;
-        TileChunks[i][j].beginDraw();
-        TileChunks[i][j].noStroke();
-        
-        for (int k = 0; k < TilesPerChunkX; k++) {
-          int x = i * TilesPerChunkX + k;
-          for (int l = 0; l < TilesPerChunkY; l++) {
-            int y = j * TilesPerChunkY + l;
-            if (voronoiRepresentation && map.VoronoiCell[x][y] != null) {
-              //Draw the cell starting point
-              if (x == (int)map.VoronoiCell[x][y].pos.x && y ==(int)map.VoronoiCell[x][y].pos.y) {
-                TileChunks[i][j].fill(0, Transparency);
-              } else {
-                TileChunks[i][j].fill(map.VoronoiCell[x][y].CellColor, Transparency);
-              }
-            } else {
-              if (map.grid[x][y] == 0) {
-                TileChunks[i][j].fill(0,Transparency);
-              } else {
-                TileChunks[i][j].fill(128, Transparency);
-              }
-            }
-            
-            TileChunks[i][j].rect(k * map.tileSizeX, l * map.tileSizeY, map.tileSizeX, map.tileSizeY);
-            
-          }
+        if (i < startVisibleXChunk || i > lastVisibleXChunk || j < startVisibleYChunk || j > lastVisibleYChunk) {
+          TileChunks[i][j] = null;
+          continue;
         }
-        //if (voronoiRepresentation && ((int)VoronoiCell[i][j].pos.x) / chunksX == i) {
-        //  TileChunks[i][j].fill(0);
-        //  TileChunks[i][j].rect(VoronoiCell[i][j].pos.x, VoronoiCell[i][j].pos.y, tileSizeX, tileSizeY);
-        //}
-        TileChunks[i][j].endDraw();
+        if (TileChunks[i][j] == null) {
+          TileChunks[i][j] = createGraphics(ChunkSize, ChunkSize);
+          
+          TileChunks[i][j].beginDraw();
+          TileChunks[i][j].noStroke();
+          for (int k = 0; k < TilesPerChunkX; k++) {
+            int x = i * TilesPerChunkX + k;
+            for (int l = 0; l < TilesPerChunkY; l++) {
+              int y = j * TilesPerChunkY + l;
+              if (voronoiRepresentation && map.VoronoiCell[x][y] != null) {
+                //Draw the cell starting point
+                if (x == (int)map.VoronoiCell[x][y].pos.x && y ==(int)map.VoronoiCell[x][y].pos.y) {
+                  TileChunks[i][j].fill(0, Transparency);
+                } else {
+                  TileChunks[i][j].fill(map.VoronoiCell[x][y].CellColor, Transparency);
+                }
+              } else {
+                if (map.grid[x][y] == 0) {
+                  //print("" + i + ", " + j+ "\n");
+                  TileChunks[i][j].fill(0,Transparency);
+                } else {
+                  TileChunks[i][j].fill(128, Transparency);
+                }
+              }
+              TileChunks[i][j].rect(k * map.tileSizeX, l * map.tileSizeY, map.tileSizeX, map.tileSizeY);
+            }
+          }
+          //if (voronoiRepresentation && ((int)VoronoiCell[i][j].pos.x) / chunksX == i) {
+          //  TileChunks[i][j].fill(0);
+          //  TileChunks[i][j].rect(VoronoiCell[i][j].pos.x, VoronoiCell[i][j].pos.y, tileSizeX, tileSizeY);
+          //}
+          TileChunks[i][j].endDraw();
+        }
       }
     }
     renderingChunks = false;
